@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Flashcards — Today's Practice</title>
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0d0d0d">
+
+  <!-- iOS / Safari PWA -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Flashcards">
+  <link rel="apple-touch-icon" href="icon-192.png">
+
+  <style>
+    body { margin: 0; background: #0d0d0d; }
+    /* Prevent double-tap zoom on all interactive elements */
+    button, input, a { touch-action: manipulation; }
+  </style>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+    function getTodayKey() {
+      const d = new Date();
+      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    }
+
+    function shuffle(arr) {
+      const a = [...arr];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    const RATINGS = [
+      { value: 1, label: "Blank", color: "#e94560" },
+      { value: 2, label: "Hard",  color: "#f4a261" },
+      { value: 3, label: "Good",  color: "#52b788" },
+      { value: 4, label: "Easy",  color: "#48cae4" },
+    ];
+
+    const words = [
+      { word: "Sophistry", pronunciation: "SOF-is-tree", definition: "Clever but flawed reasoning designed to deceive", example: "The pundit's sophistry sounded persuasive on air, but collapsed under the first serious question.", category: "Arguments & Reasoning" },
+      { word: "Syllogism", pronunciation: "SIL-uh-jiz-um", definition: "A logical argument where a conclusion follows from two premises", example: "All men are mortal, Socrates is a man — the syllogism concludes he must be mortal.", category: "Arguments & Reasoning" },
+      { word: "Tautology", pronunciation: "taw-TOL-uh-jee", definition: "Saying the same thing twice in different words; needlessly circular", example: "Saying 'a bachelor is an unmarried man' is a tautology — the definition is already baked into the word.", category: "Arguments & Reasoning" },
+      { word: "Axiom", pronunciation: "AK-see-um", definition: "A self-evident truth taken as a starting point", example: "That markets respond to incentives is treated as an axiom in most economic models.", category: "Arguments & Reasoning" },
+      { word: "Non Sequitur", pronunciation: "non SEK-wi-ter", definition: "A conclusion that doesn't follow from the evidence", example: "She argued we should cut the budget, then concluded — in a total non sequitur — that morale would improve.", category: "Arguments & Reasoning" },
+      { word: "Specious", pronunciation: "SPEE-shus", definition: "Looks valid on the surface, but isn't", example: "The lawyer's specious reasoning convinced the jury but fooled no one who read the transcript carefully.", category: "Ideas & Claims" },
+      { word: "Reductive", pronunciation: "rih-DUK-tiv", definition: "Oversimplifying something complex", example: "Calling the conflict 'just about oil' is reductive — it flattens decades of political and cultural tension.", category: "Ideas & Claims" },
+      { word: "Germane", pronunciation: "jer-MAYN", definition: "Relevant and appropriate to the topic", example: "Only evidence germane to the charge was allowed; the judge excluded everything else.", category: "Ideas & Claims" },
+      { word: "Apocryphal", pronunciation: "uh-POK-ruh-ful", definition: "Of doubtful authenticity; probably not true", example: "The story of Washington chopping down the cherry tree is almost certainly apocryphal.", category: "Ideas & Claims" },
+      { word: "Cogent", pronunciation: "KOH-jent", definition: "Clear, logical, and convincing", example: "She made a cogent case for restructuring the team, and leadership approved it on the spot.", category: "Ideas & Claims" },
+      { word: "Tendentious", pronunciation: "ten-DEN-shus", definition: "Slanted toward a particular viewpoint", example: "The documentary was tendentious — every interview and edit pushed the same predetermined conclusion.", category: "Bias & Perspective" },
+      { word: "Solipsistic", pronunciation: "sol-ip-SIS-tik", definition: "Unable to consider any perspective beyond one's own", example: "His analysis was solipsistic; he never considered how the policy might look to someone outside his experience.", category: "Bias & Perspective" },
+      { word: "Parochial", pronunciation: "puh-ROH-kee-ul", definition: "Narrow in scope; limited to a local or small-minded view", example: "The board's parochial focus on local donors meant they missed a major national grant opportunity.", category: "Bias & Perspective" },
+      { word: "Epistemic", pronunciation: "ep-ih-STEE-mik", definition: "Relating to knowledge or the degree of its validation", example: "The disagreement wasn't about values — it was epistemic: they couldn't agree on what counted as evidence.", category: "Bias & Perspective" },
+      { word: "Equivocal", pronunciation: "ih-KWIV-uh-kul", definition: "Open to multiple interpretations; ambiguous", example: "The CEO's statement was deliberately equivocal, giving investors no clear signal either way.", category: "Nuance & Complexity" },
+      { word: "Heterodox", pronunciation: "HET-er-uh-doks", definition: "Contrary to established or accepted beliefs", example: "Her heterodox view — that less sleep improves some kinds of creativity — ran counter to every study in the field.", category: "Nuance & Complexity" },
+      { word: "Dialectical", pronunciation: "dy-uh-LEK-tih-kul", definition: "Relating to the tension between opposing forces or ideas", example: "The report captured the dialectical tension between efficiency and equity that runs through every policy debate.", category: "Nuance & Complexity" },
+      { word: "Liminal", pronunciation: "LIM-ih-nul", definition: "In between two states; on the threshold of something", example: "The months between graduation and the first job are a liminal period — no longer a student, not yet a professional.", category: "Nuance & Complexity" },
+      { word: "Ad Hominem", pronunciation: "ad HOM-ih-nem", definition: "Attacking the person making an argument rather than the argument itself", example: "Rather than address the data, he went ad hominem and questioned her credentials instead.", category: "Arguments & Reasoning" },
+      { word: "Confirmation Bias", pronunciation: "kon-fer-MAY-shun BY-us", definition: "The tendency to favor information that confirms one's existing beliefs", example: "His confirmation bias was obvious — he trusted every study that agreed with him and dismissed every one that didn't.", category: "Bias & Perspective" },
+      { word: "Ambivalent", pronunciation: "am-BIV-uh-lent", definition: "Having simultaneous conflicting feelings or attitudes about something", example: "She was ambivalent about the promotion — excited by the title, dreading the travel.", category: "Nuance & Complexity" },
+      { word: "Exegesis", pronunciation: "ek-suh-JEE-sis", definition: "Critical interpretation and explanation of a text or idea", example: "The professor's exegesis of the founding documents ran three lectures and still felt incomplete.", category: "Critical Thinking" },
+      { word: "Euphemism", pronunciation: "YOO-fuh-miz-um", definition: "A mild or indirect word used in place of something blunt or unpleasant", example: "Calling layoffs a 'workforce realignment' is a euphemism that does nothing to soften the blow for those affected.", category: "Language & Rhetoric" },
+      { word: "Strawman", pronunciation: "STRAW-man", definition: "Misrepresenting someone's argument to make it easier to attack", example: "He built a strawman by pretending she wanted to abolish all regulation, then demolished that position instead.", category: "Arguments & Reasoning" },
+      { word: "Paradigm", pronunciation: "PAIR-uh-dym", definition: "A typical pattern, model, or dominant framework of thought", example: "The internet didn't just change communication — it shifted the entire paradigm of how information is valued.", category: "Ideas & Claims" },
+      { word: "Motivated Reasoning", pronunciation: "MOH-tih-vay-ted REE-zun-ing", definition: "Reasoning toward a desired conclusion rather than toward truth", example: "His motivated reasoning was transparent: he worked backward from the answer he wanted and cherry-picked the evidence.", category: "Bias & Perspective" },
+      { word: "Counterfactual", pronunciation: "kown-ter-FAK-choo-ul", definition: "Relating to what would have happened under different conditions", example: "The interesting counterfactual is what happens if the vaccine had arrived six months earlier.", category: "Critical Thinking" },
+      { word: "Laconic", pronunciation: "luh-KON-ik", definition: "Using very few words; brief and to the point", example: "His email reply was characteristically laconic: just 'No. Try again.'", category: "Language & Rhetoric" },
+      { word: "Inductive", pronunciation: "in-DUK-tiv", definition: "Reasoning from specific observations to a general conclusion", example: "From thousands of patient records, the researchers used inductive reasoning to identify a new risk pattern.", category: "Arguments & Reasoning" },
+      { word: "Salient", pronunciation: "SAY-lee-ent", definition: "Most noticeable, relevant, or important among a set of things", example: "The most salient finding wasn't the one the authors highlighted — it was buried in the appendix.", category: "Ideas & Claims" },
+      { word: "Cognitive Dissonance", pronunciation: "KOG-nih-tiv DIS-uh-nents", definition: "The discomfort of holding two conflicting beliefs simultaneously", example: "She experienced cognitive dissonance voting for a policy she privately believed was wrong.", category: "Bias & Perspective" },
+      { word: "Inchoate", pronunciation: "in-KOH-it", definition: "Just begun; not yet fully formed or clearly articulated", example: "The startup had an inchoate vision — big ambitions, but no coherent strategy for getting there.", category: "Nuance & Complexity" },
+      { word: "Hermeneutics", pronunciation: "her-muh-NOO-tiks", definition: "The theory and methodology of interpretation, especially of texts", example: "Legal hermeneutics explains why two judges can read the same law and reach opposite conclusions.", category: "Critical Thinking" },
+      { word: "Abductive", pronunciation: "ab-DUK-tiv", definition: "Inferring the most likely explanation from incomplete evidence", example: "The detective's abductive reasoning led her to the most plausible suspect, even without direct evidence.", category: "Arguments & Reasoning" },
+      { word: "Verisimilitude", pronunciation: "ver-ih-sih-MIL-ih-tood", definition: "The appearance of being true or real, even if not actually so", example: "The novel's power came from its verisimilitude — the dialogue felt like conversations you'd actually overheard.", category: "Ideas & Claims" },
+      { word: "Halo Effect", pronunciation: "HAY-loh ih-FEKT", definition: "Letting one positive trait color the overall perception of a person or idea", example: "The halo effect was at work: because the launch went well, leadership assumed everything else the team did was equally sound.", category: "Bias & Perspective" },
+      { word: "Provisional", pronunciation: "pruh-VIZ-hun-ul", definition: "Temporary or preliminary; subject to revision as new information arrives", example: "The findings are provisional — treat them as a starting point, not a settled conclusion.", category: "Nuance & Complexity" },
+      { word: "Apophenia", pronunciation: "ap-oh-FEE-nee-uh", definition: "Perceiving meaningful patterns or connections in random, unrelated data", example: "Conspiracy theories often begin with apophenia: seeing a sinister pattern in events that are simply coincidental.", category: "Critical Thinking" },
+      { word: "Deductive", pronunciation: "dih-DUK-tiv", definition: "Reasoning from general premises to a specific, necessary conclusion", example: "From the rule that all contracts require consideration, he used deductive reasoning to conclude the agreement was void.", category: "Arguments & Reasoning" },
+      { word: "Ethnocentrism", pronunciation: "eth-noh-SEN-triz-um", definition: "Judging other cultures by the standards and values of one's own", example: "The anthropologist warned against ethnocentrism: judging another society's rituals by the standards of your own.", category: "Bias & Perspective" },
+      { word: "Contingent", pronunciation: "kun-TIN-jent", definition: "Dependent on circumstances; possible but not inevitable", example: "Success here is contingent on the regulatory environment, which could change with the next election.", category: "Nuance & Complexity" },
+      { word: "Epistemology", pronunciation: "ih-pis-tuh-MOL-uh-jee", definition: "The branch of philosophy concerned with the nature and limits of knowledge", example: "Her dissertation addressed a core question in epistemology: how do we know what we claim to know?", category: "Critical Thinking" },
+      { word: "Circumlocution", pronunciation: "ser-kum-loh-KYOO-shun", definition: "Using many words where fewer would suffice; roundabout expression", example: "Rather than say 'no,' he used such elaborate circumlocution that she left the meeting unsure what he'd actually decided.", category: "Language & Rhetoric" },
+      { word: "Fallacious", pronunciation: "fuh-LAY-shus", definition: "Containing a logical error or misleading reasoning", example: "His argument was fallacious at its core: the data he cited didn't support the conclusion he drew.", category: "Arguments & Reasoning" },
+      { word: "Ostensible", pronunciation: "os-TEN-sih-bul", definition: "Appearing to be true on the surface, but not necessarily so", example: "The ostensible reason for the meeting was budget review; the real agenda was to sideline the CFO.", category: "Ideas & Claims" },
+      { word: "Presentism", pronunciation: "PREZ-ent-iz-um", definition: "Judging the past by present-day standards and values", example: "Judging Victorian novelists by today's standards of representation is a form of presentism — they operated in a very different world.", category: "Bias & Perspective" },
+      { word: "Palimpsest", pronunciation: "PAL-imp-sest", definition: "Something altered but still bearing visible traces of its earlier form", example: "The city is a palimpsest: new buildings stand over Roman foundations, and medieval street plans still shape modern traffic.", category: "Nuance & Complexity" },
+      { word: "Socratic", pronunciation: "suh-KRAT-ik", definition: "Using probing questions to expose false beliefs and reach deeper truth", example: "His Socratic approach in meetings — asking questions rather than giving answers — surfaced assumptions no one had challenged.", category: "Critical Thinking" },
+      { word: "Reductio ad Absurdum", pronunciation: "rih-DUK-tee-oh ad ab-SER-dum", definition: "Disproving a claim by showing it leads to an absurd conclusion", example: "She used reductio ad absurdum to show the policy couldn't work: taken to its logical conclusion, it would ban all commerce.", category: "Arguments & Reasoning" },
+      { word: "Spurious", pronunciation: "SPYOOR-ee-us", definition: "False, misleading, or not genuine in appearance", example: "The correlation between ice cream sales and drowning rates is spurious — both are driven by summer heat.", category: "Ideas & Claims" },
+      { word: "Myopic", pronunciation: "my-OH-pik", definition: "Lacking foresight; short-sighted in perspective or thinking", example: "The board's myopic focus on this quarter's numbers blinded them to the long-term competitive threat.", category: "Bias & Perspective" },
+      { word: "Antithetical", pronunciation: "an-tih-THET-ih-kul", definition: "Directly opposed or contrasted; the exact opposite", example: "Cutting the research budget was antithetical to everything the organization claimed to stand for.", category: "Nuance & Complexity" },
+      { word: "Falsifiable", pronunciation: "FAL-sih-fy-uh-bul", definition: "Capable of being proven false by evidence; a key criterion of science", example: "A claim that isn't falsifiable isn't science — it's closer to metaphysics.", category: "Critical Thinking" },
+      { word: "Apodictic", pronunciation: "ap-uh-DIK-tik", definition: "Clearly demonstrated; necessarily true beyond dispute", example: "The mathematical proof was apodictic — once you accepted the axioms, the conclusion was inescapable.", category: "Arguments & Reasoning" },
+      { word: "Normative", pronunciation: "NOR-muh-tiv", definition: "Relating to standards or norms of what ought to be, not what is", example: "The question of how taxes should be distributed is normative, not empirical — it's about values, not facts.", category: "Ideas & Claims" },
+      { word: "Relativism", pronunciation: "REL-uh-tiv-iz-um", definition: "The view that truth and morality are not absolute but depend on perspective", example: "Her relativism made her reluctant to criticize any cultural practice, even ones she personally found harmful.", category: "Bias & Perspective" },
+      { word: "Iterative", pronunciation: "IT-er-uh-tiv", definition: "Progressing through repeated cycles of refinement or improvement", example: "Good writing is an iterative process — the first draft is just the starting point.", category: "Nuance & Complexity" },
+      { word: "Chiasmus", pronunciation: "ky-AZ-mus", definition: "Reversing the grammatical structure of parallel phrases for stylistic effect", example: "JFK's 'ask not what your country can do for you — ask what you can do for your country' is a perfect chiasmus.", category: "Language & Rhetoric" },
+      { word: "Post Hoc", pronunciation: "pohst HOK", definition: "Wrongly assuming that because B follows A, A caused B", example: "Assuming the new CEO caused the stock rise is post hoc reasoning — the market had already been recovering.", category: "Arguments & Reasoning" },
+      { word: "Empirical", pronunciation: "em-PIR-ih-kul", definition: "Based on observation and evidence rather than theory or assumption", example: "The theory needed empirical support — elegant reasoning alone wouldn't convince the committee.", category: "Ideas & Claims" },
+      { word: "Dogmatic", pronunciation: "dog-MAT-ik", definition: "Rigidly adhering to a set of beliefs without questioning or nuance", example: "He was so dogmatic about the old methodology that he refused to consider any study that used a different approach.", category: "Bias & Perspective" },
+      { word: "Systemic", pronunciation: "sis-TEM-ik", definition: "Relating to or embedded throughout a whole system, not just one part", example: "The problem wasn't any one bad actor — the failures were systemic, embedded in the incentive structure itself.", category: "Nuance & Complexity" },
+      { word: "Ontological", pronunciation: "on-tuh-LOJ-ih-kul", definition: "Relating to the nature of being, existence, or reality itself", example: "The ontological question — what kind of thing is a corporation, exactly? — has real legal consequences.", category: "Critical Thinking" },
+      { word: "False Dichotomy", pronunciation: "fawls dy-KOT-uh-mee", definition: "Presenting only two options when more alternatives exist", example: "Framing it as 'either you're with us or against us' is a false dichotomy that ignores every other position.", category: "Arguments & Reasoning" },
+      { word: "Substantive", pronunciation: "SUB-stan-tiv", definition: "Having a firm basis in reality; meaningful and not superficial", example: "After hours of discussion, they finally reached a substantive agreement on the key sticking points.", category: "Ideas & Claims" },
+      { word: "Perspicacious", pronunciation: "per-spih-KAY-shus", definition: "Having a ready insight; shrewd and perceptive in judgment", example: "A perspicacious reader would have noticed the inconsistency in chapter two that undermines the whole thesis.", category: "Bias & Perspective" },
+      { word: "Mercurial", pronunciation: "mer-KYOOR-ee-ul", definition: "Subject to sudden or unpredictable changes; volatile", example: "His mercurial temperament made him brilliant in bursts but exhausting to work with over time.", category: "Nuance & Complexity" },
+      { word: "Synecdoche", pronunciation: "sih-NEK-duh-kee", definition: "Using a part to represent the whole, or the whole to represent a part", example: "Asking for 'a hand' is synecdoche — you're not asking for a literal hand, but for the person attached to it.", category: "Language & Rhetoric" },
+      { word: "Aporia", pronunciation: "uh-POR-ee-uh", definition: "A state of philosophical puzzlement or an unanswerable question", example: "The panel ended in aporia, with every proposed solution generating more unresolvable questions than answers.", category: "Arguments & Reasoning" },
+      { word: "Putative", pronunciation: "PYOO-tuh-tiv", definition: "Generally accepted or supposed to be the case, often without proof", example: "The putative author of the manuscript has never been definitively confirmed.", category: "Ideas & Claims" },
+      { word: "Sycophantic", pronunciation: "sik-uh-FAN-tik", definition: "Fawningly complimentary; excessively agreeable to gain favor", example: "The sycophantic applause at every executive statement made honest feedback impossible.", category: "Bias & Perspective" },
+      { word: "Deontological", pronunciation: "dee-on-tuh-LOJ-ih-kul", definition: "Relating to duty-based ethics: judging actions by rules, not outcomes", example: "From a deontological standpoint, lying to protect someone is still wrong, regardless of the outcome.", category: "Critical Thinking" },
+      { word: "Metonymy", pronunciation: "meh-TON-uh-mee", definition: "Referring to something by the name of an associated concept", example: "Saying 'the White House announced' is metonymy — the building didn't speak; the administration did.", category: "Language & Rhetoric" },
+      { word: "Heuristic", pronunciation: "hyoo-RIS-tik", definition: "A practical problem-solving approach that is useful but not guaranteed to be optimal", example: "Using price as a heuristic for quality is usually reliable, but it breaks down at the extremes.", category: "Arguments & Reasoning" },
+      { word: "Taxonomy", pronunciation: "tak-SON-uh-mee", definition: "A systematic scheme of classification or categorization", example: "The biologist proposed a new taxonomy that reorganized thousands of species based on genetics rather than physical traits.", category: "Ideas & Claims" },
+      { word: "Credulous", pronunciation: "KREJ-uh-lus", definition: "Too ready to believe things without sufficient evidence; gullible", example: "He was credulous enough to believe the email promising a lottery prize, despite the obvious red flags.", category: "Bias & Perspective" },
+      { word: "Bifurcated", pronunciation: "BY-fer-kay-ted", definition: "Divided or forked into two distinct branches or directions", example: "The report revealed a bifurcated market: premium products were thriving while the mid-range collapsed.", category: "Nuance & Complexity" },
+      { word: "Consequentialist", pronunciation: "kon-sih-KWEN-shul-ist", definition: "Judging the morality of actions by their outcomes and effects", example: "The consequentialist case for the policy was strong: outcomes improved across every metric that mattered.", category: "Critical Thinking" },
+      { word: "Occam's Razor", definition: "The principle that the simplest sufficient explanation is usually correct", category: "Arguments & Reasoning" },
+      { word: "Teleological", definition: "Relating to or explained by purpose, design, or final goals", category: "Ideas & Claims" },
+      { word: "Insular", definition: "Narrow-minded due to isolation from outside perspectives or experiences", category: "Bias & Perspective" },
+      { word: "Reification", definition: "Treating an abstract concept as if it were a concrete, tangible thing", category: "Critical Thinking" },
+      { word: "Dysphemism", definition: "A harsh or blunt expression used in place of a more neutral one", category: "Language & Rhetoric" },
+      { word: "Modus Ponens", pronunciation: "MOH-dus POH-nenz", definition: "If P implies Q, and P is true, then Q must be true", example: "The argument followed modus ponens: if the contract was signed it's binding — it was signed, so it's binding.", category: "Arguments & Reasoning" },
+      { word: "Probative", pronunciation: "PROH-buh-tiv", definition: "Having the quality of proving or demonstrating something", example: "The defense objected that the footage had no probative value — it showed nothing relevant to the charge.", category: "Ideas & Claims" },
+      { word: "Chauvinism", pronunciation: "SHOH-vin-iz-um", definition: "Excessive belief in the superiority of one's own group over others", example: "His chauvinism wasn't overt; it revealed itself in the small assumptions he made about who should lead.", category: "Bias & Perspective" },
+      { word: "Recursive", pronunciation: "rih-KER-siv", definition: "Defined in terms of itself; self-referential in structure or process", example: "The algorithm was recursive, calling itself with smaller inputs until it hit the base case.", category: "Nuance & Complexity" },
+      { word: "Anaphora", pronunciation: "uh-NAF-uh-ruh", definition: "Deliberate repetition of a phrase at the start of successive clauses", example: "The speech used anaphora to build momentum, opening nine consecutive sentences with 'We will not.'", category: "Language & Rhetoric" },
+    ];
+
+    const categoryColors = {
+      "Arguments & Reasoning": { bg: "#1a1a2e", accent: "#e94560", label: "#e94560" },
+      "Ideas & Claims":        { bg: "#0f2027", accent: "#00b4d8", label: "#00b4d8" },
+      "Bias & Perspective":    { bg: "#1a0a2e", accent: "#c77dff", label: "#c77dff" },
+      "Nuance & Complexity":   { bg: "#0a1f1a", accent: "#52b788", label: "#52b788" },
+      "Critical Thinking":     { bg: "#1f1a0a", accent: "#f4a261", label: "#f4a261" },
+      "Language & Rhetoric":   { bg: "#0a1a1f", accent: "#48cae4", label: "#48cae4" },
+    };
+
+    function Flashcards() {
+      const [index, setIndex] = useState(0);
+      const [flipped, setFlipped] = useState(false);
+      const [filter, setFilter] = useState("All");
+      const [mode, setMode] = useState("study"); // "study" | "recall"
+      const [userInput, setUserInput] = useState("");
+      const [inputResult, setInputResult] = useState(null); // null | "correct" | "wrong"
+      const [direction, setDirection] = useState(null);
+      const inputRef = useRef(null);
+      const touchStartX = useRef(null);
+      const touchStartY = useRef(null);
+
+      function handleTouchStart(e) {
+        touchStartX.current = e.touches[0].clientX;
+        touchStartY.current = e.touches[0].clientY;
+      }
+
+      function handleTouchEnd(e) {
+        if (touchStartX.current === null) return;
+        const dx = touchStartX.current - e.changedTouches[0].clientX;
+        const dy = Math.abs(touchStartY.current - e.changedTouches[0].clientY);
+        // Only trigger swipe if horizontal movement dominates and is > 50px
+        if (Math.abs(dx) > 50 && Math.abs(dx) > dy) {
+          go(dx > 0 ? "next" : "prev");
+        }
+        touchStartX.current = null;
+        touchStartY.current = null;
+      }
+
+      // Confidence map: word → 1-4 rating. Migrates from old binary mastered set.
+      const [confidence, setConfidence] = useState(() => {
+        try {
+          const saved = localStorage.getItem("flashcard-confidence");
+          if (saved) return JSON.parse(saved);
+          const oldMastered = localStorage.getItem("flashcard-mastered");
+          if (oldMastered) {
+            const masteredSet = new Set(JSON.parse(oldMastered));
+            const migrated = {};
+            masteredSet.forEach(w => { migrated[w] = 3; });
+            return migrated;
+          }
+        } catch {}
+        return {};
+      });
+
+      const [dailyWords] = useState(() => {
+        const todayKey = getTodayKey();
+        try {
+          const cached = localStorage.getItem(`flashcard-daily-${todayKey}`);
+          if (cached) {
+            const parsed = JSON.parse(cached);
+            // Re-hydrate live fields so cache stays fresh after edits
+            return parsed.map(w => {
+              const live = words.find(cw => cw.word === w.word);
+              return live ? { ...w, pronunciation: live.pronunciation, example: live.example } : w;
+            });
+          }
+        } catch {}
+        const masteredWords = new Set(
+          Object.entries(confidence).filter(([, v]) => v >= 3).map(([k]) => k)
+        );
+        const nonMastered = shuffle(words.filter(w => !masteredWords.has(w.word)));
+        const masteredArr = shuffle(words.filter(w => masteredWords.has(w.word)));
+        const todaySet = [
+          ...nonMastered.slice(0, 15),
+          ...masteredArr.slice(0, 3).map(w => ({ ...w, isReview: true })),
+        ];
+        try {
+          localStorage.setItem(`flashcard-daily-${todayKey}`, JSON.stringify(todaySet));
+        } catch {}
+        return todaySet;
+      });
+
+      useEffect(() => {
+        try {
+          localStorage.setItem("flashcard-confidence", JSON.stringify(confidence));
+        } catch {}
+      }, [confidence]);
+
+      // Reset card state when mode changes
+      useEffect(() => {
+        setFlipped(false);
+        setUserInput("");
+        setInputResult(null);
+      }, [mode]);
+
+      // Auto-focus input in recall mode
+      useEffect(() => {
+        if (mode === "recall" && !flipped && inputRef.current) {
+          setTimeout(() => inputRef.current?.focus(), 60);
+        }
+      }, [mode, flipped, index]);
+
+      const categories = ["All", ...Object.keys(categoryColors).filter(cat => dailyWords.some(w => w.category === cat))];
+      const filtered = filter === "All" ? dailyWords : dailyWords.filter(w => w.category === filter);
+      const card = filtered[index] ?? filtered[0];
+      const colors = categoryColors[card?.category] ?? categoryColors["Arguments & Reasoning"];
+      const cardConfidence = confidence[card?.word] ?? 0;
+      const masteredCount = Object.values(confidence).filter(v => v >= 3).length;
+
+      function go(dir) {
+        setDirection(dir);
+        setFlipped(false);
+        setUserInput("");
+        setInputResult(null);
+        setTimeout(() => {
+          setIndex(i => dir === "next" ? (i + 1) % filtered.length : (i - 1 + filtered.length) % filtered.length);
+          setDirection(null);
+        }, 200);
+      }
+
+      function checkAnswer() {
+        const correct = userInput.trim().toLowerCase() === card.word.toLowerCase();
+        setInputResult(correct ? "correct" : "wrong");
+        setFlipped(true);
+      }
+
+      function rateCard(rating) {
+        setConfidence(prev => ({ ...prev, [card.word]: rating }));
+      }
+
+      useEffect(() => {
+        function handleKey(e) {
+          if (e.key === "ArrowRight") { go("next"); return; }
+          if (e.key === "ArrowLeft")  { go("prev"); return; }
+          if (mode === "study" && !flipped && (e.key === " " || e.key === "ArrowUp" || e.key === "ArrowDown")) {
+            e.preventDefault(); setFlipped(true);
+          } else if (mode === "study" && flipped && (e.key === " " || e.key === "ArrowUp" || e.key === "ArrowDown")) {
+            e.preventDefault(); setFlipped(false);
+          } else if (mode === "recall" && e.key === "Enter" && !flipped && userInput.trim()) {
+            e.preventDefault(); checkAnswer();
+          } else if (flipped && ["1","2","3","4"].includes(e.key)) {
+            rateCard(parseInt(e.key));
+          }
+        }
+        window.addEventListener("keydown", handleKey);
+        return () => window.removeEventListener("keydown", handleKey);
+      }, [filtered, index, card, mode, flipped, userInput]);
+
+      return (
+        <div style={{
+          minHeight: "100vh",
+          background: "#0d0d0d",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: "24px 16px",
+          fontFamily: "'Georgia', 'Times New Roman', serif",
+        }}>
+          <style>{`
+            @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Mono:wght@400;500&display=swap');
+            * { box-sizing: border-box; }
+            .card-wrap { perspective: 1200px; }
+            .card-inner {
+              position: relative; width: 100%; height: 100%;
+              transform-style: preserve-3d;
+              transition: transform 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+            .card-inner.flipped { transform: rotateY(180deg); }
+            .card-face {
+              position: absolute; inset: 0;
+              backface-visibility: hidden; -webkit-backface-visibility: hidden;
+              border-radius: 20px;
+              display: flex; flex-direction: column; align-items: center; justify-content: center;
+              padding: 36px 32px;
+            }
+            .card-back { transform: rotateY(180deg); }
+            .slide-left  { animation: slideLeft  0.2s ease forwards; }
+            .slide-right { animation: slideRight 0.2s ease forwards; }
+            @keyframes slideLeft  { to { opacity: 0; transform: translateX(-30px); } }
+            @keyframes slideRight { to { opacity: 0; transform: translateX(30px);  } }
+            .nav-btn {
+              background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);
+              color: #fff; width: 48px; height: 48px; border-radius: 50%; font-size: 20px;
+              cursor: pointer; transition: background 0.2s, border 0.2s;
+              display: flex; align-items: center; justify-content: center;
+            }
+            .nav-btn:hover { background: rgba(255,255,255,0.14); border-color: rgba(255,255,255,0.28); }
+            .cat-btn {
+              background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+              color: rgba(255,255,255,0.55); padding: 6px 14px; border-radius: 20px;
+              font-size: 11px; letter-spacing: 0.08em; cursor: pointer;
+              font-family: 'DM Mono', monospace; transition: all 0.2s; white-space: nowrap;
+            }
+            .cat-btn.active { color: #fff; border-color: rgba(255,255,255,0.4); background: rgba(255,255,255,0.12); }
+            .mode-btn {
+              background: transparent; border: 1px solid rgba(255,255,255,0.15);
+              color: rgba(255,255,255,0.4); padding: 5px 16px; border-radius: 16px;
+              font-size: 11px; letter-spacing: 0.1em; cursor: pointer;
+              font-family: 'DM Mono', monospace; transition: all 0.2s; text-transform: uppercase;
+            }
+            .mode-btn.active { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.35); color: #fff; }
+            .recall-input {
+              background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.2);
+              border-radius: 10px; color: #fff; font-size: 18px;
+              font-family: 'Playfair Display', serif; padding: 10px 16px;
+              width: 100%; max-width: 300px; text-align: center; outline: none;
+              transition: border-color 0.2s;
+            }
+            .recall-input:focus { border-color: rgba(255,255,255,0.45); }
+            .recall-input.correct { border-color: #52b788; color: #52b788; }
+            .recall-input.wrong   { border-color: #e94560; }
+            .check-btn {
+              background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2);
+              color: #fff; padding: 7px 20px; border-radius: 20px; font-size: 12px;
+              font-family: 'DM Mono', monospace; letter-spacing: 0.08em;
+              cursor: pointer; margin-top: 10px; transition: all 0.2s;
+            }
+            .check-btn:hover { background: rgba(255,255,255,0.14); }
+            .rating-btn {
+              border: 1px solid; padding: 8px 14px; border-radius: 14px;
+              font-size: 12px; font-family: 'DM Mono', monospace; letter-spacing: 0.05em;
+              cursor: pointer; background: transparent; transition: all 0.15s;
+              touch-action: manipulation; min-height: 36px;
+            }
+            .rating-btn:hover { filter: brightness(1.2); }
+            /* Mobile sizing tweaks */
+            @media (max-width: 430px) {
+              .card-face { padding: 24px 20px !important; }
+              .nav-btn { width: 44px; height: 44px; }
+            }
+            @media (hover: none) and (pointer: coarse) {
+              .keyboard-hint { display: none; }
+              .touch-hint { display: inline; }
+            }
+            @media (hover: hover) and (pointer: fine) {
+              .touch-hint { display: none; }
+              .keyboard-hint { display: inline; }
+            }
+          `}</style>
+
+          {/* Header */}
+          <div style={{ textAlign: "center", marginBottom: 20 }}>
+            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 13, letterSpacing: "0.25em", color: "rgba(255,255,255,0.35)", textTransform: "uppercase", marginBottom: 6 }}>Analysis Vocabulary</div>
+            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, fontWeight: 900, color: "#fff", letterSpacing: "-0.01em" }}>Today's Practice</div>
+            <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, color: "rgba(255,255,255,0.25)", letterSpacing: "0.1em", marginTop: 6, marginBottom: 14 }}>
+              {dailyWords.filter(w => !w.isReview).length} new &nbsp;·&nbsp; {dailyWords.filter(w => w.isReview).length} review
+            </div>
+            <div style={{ display: "flex", gap: 6, justifyContent: "center" }}>
+              <button className={`mode-btn${mode === "study"  ? " active" : ""}`} onClick={() => setMode("study")}>Study</button>
+              <button className={`mode-btn${mode === "recall" ? " active" : ""}`} onClick={() => setMode("recall")}>Recall</button>
+            </div>
+          </div>
+
+          {/* Category filter */}
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "center", marginBottom: 24, maxWidth: 560 }}>
+            {categories.map(cat => (
+              <button key={cat} className={`cat-btn${filter === cat ? " active" : ""}`}
+                onClick={() => { setFilter(cat); setIndex(0); setFlipped(false); setUserInput(""); setInputResult(null); }}>
+                {cat === "All" ? "All" : cat.split(" ")[0]}
+              </button>
+            ))}
+          </div>
+
+          {/* Card */}
+          <div className={`card-wrap${direction ? ` slide-${direction === "next" ? "left" : "right"}` : ""}`}
+            style={{ width: "min(500px, 100%)", height: 360, touchAction: "pan-y" }}
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}>
+            <div className={`card-inner${flipped ? " flipped" : ""}`}>
+
+              {/* ── FRONT ── */}
+              <div className="card-face"
+                style={{ background: colors.bg, border: `1px solid ${colors.accent}30`, cursor: mode === "study" ? "pointer" : "default" }}
+                onClick={mode === "study" ? () => setFlipped(f => !f) : undefined}>
+
+                {/* Category label */}
+                <div style={{ position: "absolute", top: 18, left: 22, fontSize: 10, fontFamily: "'DM Mono', monospace", letterSpacing: "0.18em", color: colors.accent, textTransform: "uppercase" }}>{card?.category}</div>
+
+                {/* Badges */}
+                <div style={{ position: "absolute", top: 16, right: 18, display: "flex", gap: 6, alignItems: "center" }}>
+                  {card?.isReview && <div style={{ fontSize: 9, fontFamily: "'DM Mono', monospace", letterSpacing: "0.15em", color: colors.accent, textTransform: "uppercase", border: `1px solid ${colors.accent}70`, padding: "2px 7px", borderRadius: 10 }}>review</div>}
+                  {cardConfidence > 0 && <div style={{ fontSize: 10, fontFamily: "'DM Mono', monospace", color: RATINGS[cardConfidence - 1]?.color, opacity: 0.75 }}>{cardConfidence}/4</div>}
+                </div>
+
+                {mode === "study" ? (
+                  <>
+                    <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 38, fontWeight: 700, color: "#fff", textAlign: "center", lineHeight: 1.1, marginBottom: 8 }}>{card?.word}</div>
+                    <div style={{ fontSize: 13, fontFamily: "'DM Mono', monospace", color: colors.accent, opacity: 0.6, letterSpacing: "0.05em", fontStyle: "italic", marginBottom: 20, textAlign: "center" }}>{card?.pronunciation}</div>
+                    <div style={{ fontSize: 11, fontFamily: "'DM Mono', monospace", color: "rgba(255,255,255,0.28)", letterSpacing: "0.12em" }}>
+                      <span className="touch-hint">tap to flip · swipe to navigate</span>
+                      <span className="keyboard-hint">space to flip · ← → to navigate</span>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 16, color: "rgba(255,255,255,0.82)", textAlign: "center", lineHeight: 1.55, maxWidth: 340, marginBottom: 16, fontStyle: "italic" }}>{card?.definition}</div>
+                    <input
+                      ref={inputRef}
+                      className={`recall-input${inputResult ? ` ${inputResult}` : ""}`}
+                      type="text"
+                      placeholder="type the word…"
+                      value={userInput}
+                      onChange={e => setUserInput(e.target.value)}
+                      onKeyDown={e => { if (e.key === "Enter" && userInput.trim()) { e.preventDefault(); checkAnswer(); } }}
+                      disabled={flipped}
+                      onClick={e => e.stopPropagation()}
+                    />
+                    {!flipped && (
+                      <button className="check-btn" onClick={e => { e.stopPropagation(); if (userInput.trim()) checkAnswer(); }}>Check →</button>
+                    )}
+                    <div style={{ fontSize: 10, fontFamily: "'DM Mono', monospace", color: "rgba(255,255,255,0.2)", letterSpacing: "0.1em", marginTop: 10 }}>
+                      <span className="touch-hint">tap Check · swipe to navigate</span>
+                      <span className="keyboard-hint">enter to check · ← → to navigate</span>
+                    </div>
+                  </>
+                )}
+              </div>
+
+              {/* ── BACK ── */}
+              <div className="card-face card-back"
+                style={{ background: colors.bg, border: `1px solid ${colors.accent}50`, padding: "28px 32px", cursor: mode === "study" ? "pointer" : "default" }}
+                onClick={mode === "study" ? () => setFlipped(false) : undefined}>
+
+                {/* Word + result indicator */}
+                <div style={{ marginBottom: 2, textAlign: "center" }}>
+                  <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 15, color: "rgba(255,255,255,0.5)", fontStyle: "italic" }}>{card?.word}</span>
+                  {inputResult === "correct" && <span style={{ marginLeft: 8, fontSize: 13, color: "#52b788" }}>✓ correct</span>}
+                  {inputResult === "wrong"   && <span style={{ marginLeft: 8, fontSize: 11, fontFamily: "'DM Mono', monospace", color: "#e94560" }}>you wrote: {userInput}</span>}
+                </div>
+
+                {/* Pronunciation */}
+                <div style={{ fontSize: 11, fontFamily: "'DM Mono', monospace", color: colors.accent, opacity: 0.55, letterSpacing: "0.05em", fontStyle: "italic", marginBottom: 10, textAlign: "center" }}>{card?.pronunciation}</div>
+
+                {/* Definition */}
+                <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 17, color: "#fff", textAlign: "center", lineHeight: 1.5, maxWidth: 380, marginBottom: 8 }}>{card?.definition}</div>
+
+                {/* Example */}
+                <div style={{ fontSize: 12, fontFamily: "'Playfair Display', serif", fontStyle: "italic", color: "rgba(255,255,255,0.36)", textAlign: "center", lineHeight: 1.55, maxWidth: 380, marginBottom: 14 }}>"{card?.example}"</div>
+
+                {/* 1–4 confidence rating */}
+                <div style={{ display: "flex", gap: 6, flexWrap: "wrap", justifyContent: "center" }}>
+                  {RATINGS.map(r => (
+                    <button key={r.value} className="rating-btn"
+                      style={{ borderColor: r.color, color: cardConfidence === r.value ? "#000" : r.color, background: cardConfidence === r.value ? r.color : "transparent" }}
+                      onClick={e => { e.stopPropagation(); rateCard(r.value); }}>
+                      {r.value} · {r.label}
+                    </button>
+                  ))}
+                </div>
+                <div style={{ fontSize: 10, fontFamily: "'DM Mono', monospace", color: "rgba(255,255,255,0.18)", letterSpacing: "0.1em", marginTop: 8 }}>1–4 keys to rate</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Navigation */}
+          <div style={{ display: "flex", alignItems: "center", gap: 24, marginTop: 24 }}>
+            <button className="nav-btn" onClick={() => go("prev")}>←</button>
+            <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 13, color: "rgba(255,255,255,0.4)", minWidth: 70, textAlign: "center" }}>
+              {(index % filtered.length) + 1} / {filtered.length}
+            </div>
+            <button className="nav-btn" onClick={() => go("next")}>→</button>
+          </div>
+
+          {/* Stats */}
+          <div style={{ marginTop: 18, fontFamily: "'DM Mono', monospace", fontSize: 11, letterSpacing: "0.12em", color: "rgba(255,255,255,0.25)", textAlign: "center" }}>
+            {masteredCount} mastered (≥3) &nbsp;·&nbsp; {words.length} in bank
+          </div>
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<Flashcards />);
+  </script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(err => {
+          console.warn('Service worker registration failed:', err);
+        });
+      });
+    }
+  </script>
+</body>
+</html>
