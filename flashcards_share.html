@@ -1,0 +1,557 @@
+<!--
+╔══════════════════════════════════════════════════════════════════════════════╗
+║               AGENT INSTRUCTIONS — HOW TO ADD WORDS TO THIS FILE            ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+Copy and paste the following prompt into an AI agent (Claude, ChatGPT, etc.)
+when you want it to add new words to this flashcard deck:
+
+────────────────────────────────────────────────────────────────────────────────
+
+You are helping me maintain a vocabulary flashcard app stored in a single HTML
+file called flashcards_share.html (or flashcards.html). All word data lives in
+a JavaScript array called `words` inside a <script type="text/babel"> block.
+
+WORD FORMAT — every entry must follow this exact structure (one line per word):
+  { word: "...", pronunciation: "...", definition: "...", example: "...", category: "..." },
+
+FIELD RULES:
+  word         — The word or phrase exactly as it should appear on the card.
+                 (e.g., "Sophistry", "Ad Hominem", "Sunk Cost Fallacy")
+
+  pronunciation — Readable phonetic respelling using hyphens between syllables.
+                  ALL-CAPS marks the primary stressed syllable.
+                  (e.g., "SOF-is-tree", "ad HOM-ih-nem", "SUNK KOST FAL-uh-see")
+
+  definition   — One clear, concise sentence. No jargon. No dictionary-style
+                 abbreviations. Write as if explaining to a smart friend.
+                 (e.g., "Clever but flawed reasoning designed to deceive")
+
+  example      — One vivid, real-world sentence using the word in context.
+                 Make it memorable — a specific scenario beats a generic one.
+                 (e.g., "The pundit's sophistry sounded persuasive on air,
+                         but collapsed under the first serious question.")
+
+  category     — Must be EXACTLY one of these six strings (copy precisely):
+                   "Arguments & Reasoning"
+                   "Ideas & Claims"
+                   "Bias & Perspective"
+                   "Nuance & Complexity"
+                   "Critical Thinking"
+                   "Language & Rhetoric"
+
+EDITING RULES:
+  1. Find `const words = [` in the file. Append new entries before the `];`
+  2. Use double quotes throughout — no single quotes or template literals
+  3. Every entry ends with a comma (including the last new entry you add)
+  4. Do not duplicate any word already in the array
+  5. Preserve all existing entries exactly as they are
+
+QUALITY BAR:
+  - Prefer words that appear in analytical writing, debate, journalism, or
+    philosophy — words you'd encounter in a serious nonfiction book.
+  - Definitions should be crisp and distinctive, not padded.
+  - Examples should be concrete: name a profession, a scenario, a situation.
+    Avoid "In a conversation, someone might..." — show, don't abstract.
+
+────────────────────────────────────────────────────────────────────────────────
+END OF AGENT INSTRUCTIONS
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flashcards — Today's Practice</title>
+  <style>
+    body { margin: 0; background: #0d0d0d; }
+  </style>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+    function getTodayKey() {
+      const d = new Date();
+      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    }
+
+    function shuffle(arr) {
+      const a = [...arr];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    const RATINGS = [
+      { value: 1, label: "Blank", color: "#e94560" },
+      { value: 2, label: "Hard",  color: "#f4a261" },
+      { value: 3, label: "Good",  color: "#52b788" },
+      { value: 4, label: "Easy",  color: "#48cae4" },
+    ];
+
+    const words = [
+      // ── Arguments & Reasoning ──────────────────────────────────────────────
+      { word: "Sophistry", pronunciation: "SOF-is-tree", definition: "Clever but flawed reasoning designed to deceive", example: "The pundit's sophistry sounded persuasive on air, but collapsed under the first serious question.", category: "Arguments & Reasoning" },
+      { word: "Syllogism", pronunciation: "SIL-uh-jiz-um", definition: "A logical argument where a conclusion follows from two premises", example: "All men are mortal, Socrates is a man — the syllogism concludes he must be mortal.", category: "Arguments & Reasoning" },
+      { word: "Tautology", pronunciation: "taw-TOL-uh-jee", definition: "Saying the same thing twice in different words; needlessly circular", example: "Saying 'a bachelor is an unmarried man' is a tautology — the definition is already baked into the word.", category: "Arguments & Reasoning" },
+      { word: "Axiom", pronunciation: "AK-see-um", definition: "A self-evident truth taken as a starting point", example: "That markets respond to incentives is treated as an axiom in most economic models.", category: "Arguments & Reasoning" },
+      { word: "Non Sequitur", pronunciation: "non SEK-wi-ter", definition: "A conclusion that doesn't follow from the evidence", example: "She argued we should cut the budget, then concluded — in a total non sequitur — that morale would improve.", category: "Arguments & Reasoning" },
+      { word: "Ad Hominem", pronunciation: "ad HOM-ih-nem", definition: "Attacking the person making an argument rather than the argument itself", example: "Rather than address the data, he went ad hominem and questioned her credentials instead.", category: "Arguments & Reasoning" },
+      { word: "Strawman", pronunciation: "STRAW-man", definition: "Misrepresenting someone's argument to make it easier to attack", example: "He built a strawman by pretending she wanted to abolish all regulation, then demolished that position instead.", category: "Arguments & Reasoning" },
+      { word: "Inductive", pronunciation: "in-DUK-tiv", definition: "Reasoning from specific observations to a general conclusion", example: "From thousands of patient records, the researchers used inductive reasoning to identify a new risk pattern.", category: "Arguments & Reasoning" },
+      { word: "Deductive", pronunciation: "dih-DUK-tiv", definition: "Reasoning from general premises to a specific, necessary conclusion", example: "From the rule that all contracts require consideration, he used deductive reasoning to conclude the agreement was void.", category: "Arguments & Reasoning" },
+      { word: "Abductive", pronunciation: "ab-DUK-tiv", definition: "Inferring the most likely explanation from incomplete evidence", example: "The detective's abductive reasoning led her to the most plausible suspect, even without direct evidence.", category: "Arguments & Reasoning" },
+      { word: "Reductio ad Absurdum", pronunciation: "rih-DUK-tee-oh ad ab-SER-dum", definition: "Disproving a claim by showing it leads to an absurd conclusion", example: "She used reductio ad absurdum to show the policy couldn't work: taken to its logical conclusion, it would ban all commerce.", category: "Arguments & Reasoning" },
+      { word: "Slippery Slope", pronunciation: "SLIP-ee SLOHP", definition: "The fallacy that one event will inevitably lead to extreme consequences", example: "The slippery slope argument — that one exemption would unravel the entire policy — ignored the many safeguards in place.", category: "Arguments & Reasoning" },
+      { word: "False Equivalence", pronunciation: "fawls ih-KWIV-uh-lents", definition: "Treating two fundamentally different things as comparable", example: "Comparing a minor procedural misstep to deliberate fraud is a false equivalence that distorts the severity of both.", category: "Arguments & Reasoning" },
+      { word: "Appeal to Authority", pronunciation: "uh-PEEL too uh-THOR-ih-tee", definition: "Using someone's status rather than the merit of their argument as evidence", example: "Citing a celebrity's views on nutrition is an appeal to authority that confuses fame with expertise.", category: "Arguments & Reasoning" },
+      { word: "Begging the Question", pronunciation: "BEG-ing thuh KWES-chun", definition: "Assuming the conclusion within the premise itself", example: "Saying 'this policy is good because it benefits society' begs the question — that benefit is exactly what's disputed.", category: "Arguments & Reasoning" },
+      { word: "Hasty Generalization", pronunciation: "HAY-stee jen-er-uh-lih-ZAY-shun", definition: "Drawing a broad conclusion from too few examples", example: "Judging an entire organization by one bad interaction is a hasty generalization.", category: "Arguments & Reasoning" },
+      { word: "Equivocation", pronunciation: "ih-kwiv-uh-KAY-shun", definition: "Exploiting a word's multiple meanings to mislead", example: "The politician's equivocation on 'investment' — shifting between spending and financial return — obscured what was actually proposed.", category: "Arguments & Reasoning" },
+      { word: "Tu Quoque", pronunciation: "too KWOH-kway", definition: "Deflecting criticism by pointing out the accuser's similar behavior", example: "His tu quoque — 'you do it too' — didn't address whether the practice was actually wrong.", category: "Arguments & Reasoning" },
+      { word: "Red Herring", pronunciation: "red HER-ing", definition: "Introducing an irrelevant issue to distract from the real argument", example: "Bringing up historical grievances when asked about current performance was a red herring that derailed the meeting.", category: "Arguments & Reasoning" },
+      { word: "Genetic Fallacy", pronunciation: "jeh-NET-ik FAL-uh-see", definition: "Judging an idea by its source rather than its merit", example: "Dismissing research because it was funded by a competitor is the genetic fallacy — the data stands or falls on its own.", category: "Arguments & Reasoning" },
+      { word: "Prima Facie", pronunciation: "PRY-muh FAY-shee", definition: "Accepted as correct on first impression, until disproved", example: "The evidence was prima facie compelling — enough to justify a full investigation.", category: "Arguments & Reasoning" },
+      { word: "A Priori", pronunciation: "ay pry-OR-ee", definition: "Derived from theory or logic, independent of observation", example: "The conclusion was a priori: it followed from the premises without needing any empirical data.", category: "Arguments & Reasoning" },
+      { word: "A Posteriori", pronunciation: "ay pos-teer-ee-OR-ee", definition: "Derived from observation or experience rather than theory alone", example: "Unlike the philosopher's armchair reasoning, the scientist's case was a posteriori — built entirely on experimental results.", category: "Arguments & Reasoning" },
+      { word: "Modus Tollens", pronunciation: "MOH-dus TOL-enz", definition: "If P implies Q, and Q is false, then P must be false", example: "Modus tollens: if the alibi held, the suspect couldn't have been there — but the alibi collapsed, so neither could the defense.", category: "Arguments & Reasoning" },
+      { word: "Burden of Proof", pronunciation: "BER-den uv PROOF", definition: "The obligation on the party making a claim to support it with evidence", example: "He made the assertion; the burden of proof was on him to demonstrate it, not on critics to disprove it.", category: "Arguments & Reasoning" },
+      { word: "Enthymeme", pronunciation: "EN-thuh-meem", definition: "A syllogism in which one premise is left unstated", example: "The ad was an enthymeme: 'Champions drink Brand X' — implying you should too, without stating why.", category: "Arguments & Reasoning" },
+      { word: "Necessary Condition", pronunciation: "NES-uh-ser-ee kun-DIH-shun", definition: "A condition that must be present for something to occur", example: "Trust is a necessary condition for a functional team — without it, collaboration breaks down.", category: "Arguments & Reasoning" },
+      { word: "Sufficient Condition", pronunciation: "suh-FISH-ent kun-DIH-shun", definition: "A condition whose presence alone guarantees an outcome", example: "A signed contract is a sufficient condition for legal obligation — nothing else is required.", category: "Arguments & Reasoning" },
+      { word: "Contrapositive", pronunciation: "kon-truh-POZ-ih-tiv", definition: "The logically equivalent form of a statement with both parts negated and reversed", example: "The contrapositive of 'if it rains, the ground gets wet' is 'if the ground isn't wet, it didn't rain.'", category: "Arguments & Reasoning" },
+      { word: "Circular Reasoning", pronunciation: "SER-kyuh-ler REE-zun-ing", definition: "Supporting a claim with itself stated differently", example: "His circular reasoning went: 'The text is true because it's divinely inspired, and we know this because the text says so.'", category: "Arguments & Reasoning" },
+      { word: "Composition Fallacy", pronunciation: "kom-puh-ZIH-shun FAL-uh-see", definition: "Assuming the whole must have the same properties as its parts", example: "It's the composition fallacy to assume a team of brilliant individuals will automatically be a brilliant team.", category: "Arguments & Reasoning" },
+      { word: "Division Fallacy", pronunciation: "dih-VIH-zhun FAL-uh-see", definition: "Assuming each part must have the same properties as the whole", example: "Assuming every player on a championship team is elite is the division fallacy — the team's strength was systemic.", category: "Arguments & Reasoning" },
+      { word: "No True Scotsman", pronunciation: "noh TROO SKOTS-mun", definition: "Redefining a category to exclude inconvenient counterexamples", example: "'No real scientist would question this' is No True Scotsman — redrawn to protect the generalization from refutation.", category: "Arguments & Reasoning" },
+      { word: "Moving the Goalposts", pronunciation: "MOO-ving thuh GOHL-pohsts", definition: "Changing the criteria for success after they have already been met", example: "Moving the goalposts: every time the research team met a standard, the critics invented a stricter one.", category: "Arguments & Reasoning" },
+      { word: "Special Pleading", pronunciation: "SPESH-ul PLEE-ding", definition: "Claiming an exception to a rule for oneself without adequate justification", example: "His special pleading — 'the rule applies to everyone else, but my situation is different' — was transparent and unconvincing.", category: "Arguments & Reasoning" },
+      { word: "Appeal to Nature", pronunciation: "uh-PEEL too NAY-cher", definition: "Assuming that what is natural is therefore good or correct", example: "The appeal to nature — 'it's all-natural, so it must be safe' — ignores the many natural substances that are highly toxic.", category: "Arguments & Reasoning" },
+      { word: "Paralogism", pronunciation: "puh-RAL-uh-jiz-um", definition: "A logical fallacy committed unknowingly", example: "His paralogism was sincere — he genuinely believed the flawed reasoning — which made it harder, not easier, to correct.", category: "Arguments & Reasoning" },
+      { word: "Corollary", pronunciation: "KOR-uh-ler-ee", definition: "A proposition that follows naturally from a proven one", example: "If privacy is a right, then the corollary is that surveillance without consent is a violation.", category: "Arguments & Reasoning" },
+      { word: "Hypothesis", pronunciation: "hy-POTH-ih-sis", definition: "A tentative explanation proposed for testing", example: "The hypothesis — that early feedback reduces revision time — was supported by every subsequent experiment.", category: "Arguments & Reasoning" },
+      { word: "Extrapolation", pronunciation: "ek-strap-uh-LAY-shun", definition: "Extending a conclusion beyond the known range of data", example: "Extrapolating decades of trends from a five-year dataset is methodologically risky.", category: "Arguments & Reasoning" },
+      { word: "Appeal to Emotion", pronunciation: "uh-PEEL too ih-MOH-shun", definition: "Persuading through feeling rather than logic or evidence", example: "The campaign relied entirely on appeal to emotion, with no factual claims about what the policy would achieve.", category: "Arguments & Reasoning" },
+      { word: "Inference", pronunciation: "IN-fer-ents", definition: "A conclusion reached through reasoning from evidence", example: "From the absence of footprints, she drew the inference that no one had entered since the snowfall.", category: "Arguments & Reasoning" },
+      { word: "Premise", pronunciation: "PREM-is", definition: "A statement used as the foundation of an argument", example: "The entire argument rested on a single flawed premise: that the baseline data was uncorrupted.", category: "Arguments & Reasoning" },
+      { word: "Conjecture", pronunciation: "kun-JEK-cher", definition: "A conclusion or opinion formed without proof", example: "The claim remained conjecture until the trial produced documentary evidence.", category: "Arguments & Reasoning" },
+
+      // ── Ideas & Claims ─────────────────────────────────────────────────────
+      { word: "Specious", pronunciation: "SPEE-shus", definition: "Looks valid on the surface, but isn't", example: "The lawyer's specious reasoning convinced the jury but fooled no one who read the transcript carefully.", category: "Ideas & Claims" },
+      { word: "Reductive", pronunciation: "rih-DUK-tiv", definition: "Oversimplifying something complex", example: "Calling the conflict 'just about oil' is reductive — it flattens decades of political and cultural tension.", category: "Ideas & Claims" },
+      { word: "Germane", pronunciation: "jer-MAYN", definition: "Relevant and appropriate to the topic", example: "Only evidence germane to the charge was allowed; the judge excluded everything else.", category: "Ideas & Claims" },
+      { word: "Apocryphal", pronunciation: "uh-POK-ruh-ful", definition: "Of doubtful authenticity; probably not true", example: "The story of Washington chopping down the cherry tree is almost certainly apocryphal.", category: "Ideas & Claims" },
+      { word: "Cogent", pronunciation: "KOH-jent", definition: "Clear, logical, and convincing", example: "She made a cogent case for restructuring the team, and leadership approved it on the spot.", category: "Ideas & Claims" },
+      { word: "Paradigm", pronunciation: "PAIR-uh-dym", definition: "A typical pattern, model, or dominant framework of thought", example: "The internet didn't just change communication — it shifted the entire paradigm of how information is valued.", category: "Ideas & Claims" },
+      { word: "Salient", pronunciation: "SAY-lee-ent", definition: "Most noticeable, relevant, or important among a set of things", example: "The most salient finding wasn't the one the authors highlighted — it was buried in the appendix.", category: "Ideas & Claims" },
+      { word: "Verisimilitude", pronunciation: "ver-ih-sih-MIL-ih-tood", definition: "The appearance of being true or real, even if not actually so", example: "The novel's power came from its verisimilitude — the dialogue felt like conversations you'd actually overheard.", category: "Ideas & Claims" },
+      { word: "Abstraction", pronunciation: "ab-STRAK-shun", definition: "The process of generalizing from specific instances to broader concepts", example: "At the level of abstraction the report operated on, the real operational difficulties were invisible.", category: "Ideas & Claims" },
+      { word: "Essentialism", pronunciation: "ih-SEN-shuh-liz-um", definition: "The belief that things have fixed, inherent properties that define them", example: "Her essentialism about leadership — that great leaders are born, not made — was increasingly hard to defend.", category: "Ideas & Claims" },
+      { word: "Nominalism", pronunciation: "NOM-ih-nuh-liz-um", definition: "The view that abstract concepts have no existence beyond individual instances", example: "The nominalist argued that 'justice' doesn't exist as a thing — only just acts do.", category: "Ideas & Claims" },
+      { word: "Constructivism", pronunciation: "kun-STRUK-tih-viz-um", definition: "The view that knowledge and meaning are constructed by minds, not discovered", example: "Her constructivist approach meant she saw scientific facts as consensus products, not mind-independent truths.", category: "Ideas & Claims" },
+      { word: "Pragmatism", pronunciation: "PRAG-muh-tiz-um", definition: "The approach of judging ideas by their practical consequences", example: "His pragmatism cut through the philosophical debate: if it works reliably, that is sufficient justification.", category: "Ideas & Claims" },
+      { word: "Idealism", pronunciation: "eye-DEE-uh-liz-um", definition: "The view that reality is fundamentally mental or idea-based", example: "The idealist argued that the physical world is only knowable through perception, and thus shaped by mind.", category: "Ideas & Claims" },
+      { word: "Materialism", pronunciation: "muh-TEER-ee-uh-liz-um", definition: "The view that matter and physical processes are the basis of all reality", example: "Her materialism left no room for consciousness as anything beyond a brain state.", category: "Ideas & Claims" },
+      { word: "Determinism", pronunciation: "dih-TER-mih-niz-um", definition: "The doctrine that all events are caused by prior events, leaving no room for free will", example: "His determinism made punishment philosophically complex — if the criminal couldn't have done otherwise, what justifies prison?", category: "Ideas & Claims" },
+      { word: "Pluralism", pronunciation: "PLOOR-uh-liz-um", definition: "The acceptance of multiple coexisting truths, authorities, or frameworks", example: "The committee's pluralism meant no single methodology dominated; the report drew equally from sociology, economics, and history.", category: "Ideas & Claims" },
+      { word: "Dualism", pronunciation: "DOO-uh-liz-um", definition: "The view that reality consists of two distinct and irreducible substances or principles", example: "The mind-body problem in dualism: if mind and matter are totally separate, how do they causally interact?", category: "Ideas & Claims" },
+      { word: "Utilitarianism", pronunciation: "yoo-til-ih-TAIR-ee-uh-niz-um", definition: "The ethical theory that the right action maximizes overall well-being", example: "The utilitarian case for the policy was purely numerical: more people would benefit than suffer.", category: "Ideas & Claims" },
+      { word: "Virtue Ethics", pronunciation: "VER-choo ETH-iks", definition: "The ethical theory focused on character rather than rules or outcomes", example: "Virtue ethics asks not 'what should I do?' but 'what kind of person should I be?'", category: "Ideas & Claims" },
+      { word: "Contractarianism", pronunciation: "kun-trak-TAIR-ee-uh-niz-um", definition: "The ethical view that morality derives from a social contract between rational agents", example: "Contractarianism grounds justice in what rational people would agree to behind a veil of ignorance about their own situation.", category: "Ideas & Claims" },
+      { word: "Instrumentalism", pronunciation: "in-struh-MEN-tuh-liz-um", definition: "The view that theories are tools for prediction, not descriptions of an underlying reality", example: "His instrumentalism meant he didn't care whether the model was 'true' — only whether it produced accurate predictions.", category: "Ideas & Claims" },
+      { word: "Phenomenology", pronunciation: "fih-nom-ih-NOL-uh-jee", definition: "The philosophical study of consciousness and the structures of lived experience", example: "Phenomenology asks what an experience is like from the inside — bracketing all assumptions about the external world.", category: "Ideas & Claims" },
+      { word: "Parsimony", pronunciation: "PAR-sih-moh-nee", definition: "The principle of using the simplest explanation that adequately fits the facts", example: "Parsimony demands we not multiply causes beyond what the evidence requires.", category: "Ideas & Claims" },
+      { word: "Underdetermination", pronunciation: "un-der-dih-ter-mih-NAY-shun", definition: "The situation where evidence is insufficient to uniquely pick out the correct theory", example: "The underdetermination of the data was the problem — two incompatible theories both fit equally well.", category: "Ideas & Claims" },
+      { word: "Principle of Charity", pronunciation: "PRIN-sih-pul uv CHAIR-ih-tee", definition: "Interpreting an argument in its strongest, most reasonable form before criticizing it", example: "The principle of charity demands we engage with the best version of the opposing view, not a caricature.", category: "Ideas & Claims" },
+      { word: "Infinite Regress", pronunciation: "IN-fih-nit REE-gres", definition: "A chain of reasoning that requires an endless series of prior justifications", example: "The question 'but why?' leads to infinite regress unless you posit a starting point that needs no further justification.", category: "Ideas & Claims" },
+      { word: "Conceptual Analysis", pronunciation: "kon-SEP-choo-ul uh-NAL-ih-sis", definition: "Breaking down a concept into its essential components to clarify its meaning", example: "Her conceptual analysis of 'fairness' revealed three distinct and conflicting meanings buried in the same proposal.", category: "Ideas & Claims" },
+      { word: "Weltanschauung", pronunciation: "VEL-tahn-show-oong", definition: "A comprehensive worldview or philosophy of life through which one interprets all experience", example: "His Weltanschauung was shaped entirely by his business background — every social question reduced to a question of efficiency.", category: "Ideas & Claims" },
+      { word: "Zeitgeist", pronunciation: "ZYT-gyst", definition: "The defining spirit or mood of a particular historical period", example: "The startup culture of that era had a Zeitgeist of disruption — every pitch promised to upend an established industry.", category: "Ideas & Claims" },
+      { word: "Occam's Broom", pronunciation: "OK-umz BROOM", definition: "Selectively sweeping inconvenient evidence under the rug to protect a favored theory", example: "The analyst practiced Occam's broom — data points that contradicted the model simply never appeared in the final report.", category: "Ideas & Claims" },
+      { word: "Operationalization", pronunciation: "op-er-ay-shuh-nuh-lih-ZAY-shun", definition: "Defining an abstract concept in measurable, observable terms for study", example: "The study's operationalization of 'engagement' as time-on-page was convenient but missed the most meaningful interactions.", category: "Ideas & Claims" },
+      { word: "Scope Creep", pronunciation: "SKOHP KREEP", definition: "The gradual, unannounced expansion of a claim beyond its original bounds", example: "What began as a narrow empirical claim suffered scope creep until it purported to explain all of human behavior.", category: "Ideas & Claims" },
+      { word: "Pragmatic Contradiction", pronunciation: "prag-MAT-ik kon-truh-DIK-shun", definition: "When the act of making a claim contradicts the claim's own content", example: "Saying 'I cannot speak' is a pragmatic contradiction — the utterance itself disproves the statement.", category: "Ideas & Claims" },
+
+      // ── Bias & Perspective ─────────────────────────────────────────────────
+      { word: "Tendentious", pronunciation: "ten-DEN-shus", definition: "Slanted toward a particular viewpoint", example: "The documentary was tendentious — every interview and edit pushed the same predetermined conclusion.", category: "Bias & Perspective" },
+      { word: "Solipsistic", pronunciation: "sol-ip-SIS-tik", definition: "Unable to consider any perspective beyond one's own", example: "His analysis was solipsistic; he never considered how the policy might look to someone outside his experience.", category: "Bias & Perspective" },
+      { word: "Parochial", pronunciation: "puh-ROH-kee-ul", definition: "Narrow in scope; limited to a local or small-minded view", example: "The board's parochial focus on local donors meant they missed a major national grant opportunity.", category: "Bias & Perspective" },
+      { word: "Epistemic", pronunciation: "ep-ih-STEE-mik", definition: "Relating to knowledge or the degree of its validation", example: "The disagreement wasn't about values — it was epistemic: they couldn't agree on what counted as evidence.", category: "Bias & Perspective" },
+      { word: "Confirmation Bias", pronunciation: "kon-fer-MAY-shun BY-us", definition: "The tendency to favor information that confirms one's existing beliefs", example: "His confirmation bias was obvious — he trusted every study that agreed with him and dismissed every one that didn't.", category: "Bias & Perspective" },
+      { word: "Motivated Reasoning", pronunciation: "MOH-tih-vay-ted REE-zun-ing", definition: "Reasoning toward a desired conclusion rather than toward truth", example: "His motivated reasoning was transparent: he worked backward from the answer he wanted and cherry-picked the evidence.", category: "Bias & Perspective" },
+      { word: "Cognitive Dissonance", pronunciation: "KOG-nih-tiv DIS-uh-nents", definition: "The discomfort of holding two conflicting beliefs simultaneously", example: "She experienced cognitive dissonance voting for a policy she privately believed was wrong.", category: "Bias & Perspective" },
+      { word: "Halo Effect", pronunciation: "HAY-loh ih-FEKT", definition: "Letting one positive trait color the overall perception of a person or idea", example: "The halo effect was at work: because the launch went well, leadership assumed everything else the team did was equally sound.", category: "Bias & Perspective" },
+      { word: "Ethnocentrism", pronunciation: "eth-noh-SEN-triz-um", definition: "Judging other cultures by the standards and values of one's own", example: "The anthropologist warned against ethnocentrism: judging another society's rituals by the standards of your own.", category: "Bias & Perspective" },
+      { word: "Fundamental Attribution Error", pronunciation: "fun-duh-MEN-tul at-rib-YOO-shun EHR-er", definition: "Overattributing others' behavior to character while underweighting their situation", example: "The fundamental attribution error led him to call the late employee lazy, ignoring the transit breakdown.", category: "Bias & Perspective" },
+      { word: "Self-Serving Bias", pronunciation: "self-SER-ving BY-us", definition: "Attributing successes to oneself and failures to external factors", example: "Her self-serving bias was transparent: wins were her strategy, losses were bad luck.", category: "Bias & Perspective" },
+      { word: "Availability Heuristic", pronunciation: "uh-VAY-luh-bil-ih-tee hyoo-RIS-tik", definition: "Overweighting the likelihood of events that come easily to mind", example: "Fear of flying over driving reflects the availability heuristic — plane crashes are vivid; highway deaths are not.", category: "Bias & Perspective" },
+      { word: "Anchoring Bias", pronunciation: "ANG-ker-ing BY-us", definition: "Relying too heavily on the first piece of information encountered", example: "The anchoring bias meant the inflated opening offer set the baseline for every subsequent negotiation.", category: "Bias & Perspective" },
+      { word: "In-Group Bias", pronunciation: "IN-groop BY-us", definition: "Favoring members of one's own group over outsiders", example: "The in-group bias in hiring was subtle: identical résumés got different callbacks depending on the name at the top.", category: "Bias & Perspective" },
+      { word: "Status Quo Bias", pronunciation: "STAY-tus KWOH BY-us", definition: "Preference for the current state of affairs over change, even when change would be beneficial", example: "Status quo bias made the board reluctant to exit the failing division — not because the numbers justified staying, but because change felt risky.", category: "Bias & Perspective" },
+      { word: "Sunk Cost Fallacy", pronunciation: "SUNK KOST FAL-uh-see", definition: "Continuing an endeavor because of past investment rather than future value", example: "The sunk cost fallacy kept them funding the project long after the returns case had evaporated.", category: "Bias & Perspective" },
+      { word: "Gambler's Fallacy", pronunciation: "GAM-blerz FAL-uh-see", definition: "Believing that past random outcomes affect future independent probabilities", example: "The gambler's fallacy: after ten heads in a row, he bet heavily on tails — as if the coin remembered.", category: "Bias & Perspective" },
+      { word: "Recency Bias", pronunciation: "REE-sent-see BY-us", definition: "Weighting recent events more heavily than earlier ones of equal significance", example: "Her recency bias made one bad quarter feel like the whole company was collapsing.", category: "Bias & Perspective" },
+      { word: "Survivorship Bias", pronunciation: "ser-VY-ver-ship BY-us", definition: "Drawing conclusions only from visible successes while ignoring failures", example: "Studying only successful startups for lessons is survivorship bias — the failures hold equally important information.", category: "Bias & Perspective" },
+      { word: "Framing Effect", pronunciation: "FRAYM-ing ih-FEKT", definition: "Allowing the way information is presented to affect judgment of its content", example: "The framing effect was stark: calling it a '10% failure rate' vs. a '90% success rate' produced different reactions to the same drug.", category: "Bias & Perspective" },
+      { word: "Hindsight Bias", pronunciation: "HYND-syt BY-us", definition: "Believing, after an event, that one knew it would happen all along", example: "The hindsight bias made the financial crisis seem obvious in retrospect — but very few had predicted it beforehand.", category: "Bias & Perspective" },
+      { word: "Overconfidence Bias", pronunciation: "oh-ver-KON-fih-dents BY-us", definition: "Systematically overestimating the accuracy of one's own judgments", example: "Overconfidence bias led the team to underestimate how long the project would take — by six months.", category: "Bias & Perspective" },
+      { word: "Planning Fallacy", pronunciation: "PLAN-ing FAL-uh-see", definition: "Systematically underestimating the time, costs, and risks of future plans", example: "The planning fallacy struck again: what the team said would take three months took eight.", category: "Bias & Perspective" },
+      { word: "Dunning-Kruger Effect", pronunciation: "DUN-ing KROO-ger ih-FEKT", definition: "The tendency for low-competence individuals to overestimate their ability", example: "The Dunning-Kruger effect was on full display: the most confidently wrong voice in the room had the least relevant experience.", category: "Bias & Perspective" },
+      { word: "Illusory Correlation", pronunciation: "ih-LOO-suh-ree kor-uh-LAY-shun", definition: "Perceiving a relationship between variables that doesn't actually exist", example: "Their belief that crime increased during full moons was an illusory correlation — the data showed no such pattern.", category: "Bias & Perspective" },
+      { word: "False Consensus Effect", pronunciation: "fawls kun-SEN-sus ih-FEKT", definition: "Overestimating how widely one's own beliefs or behaviors are shared by others", example: "The false consensus effect led him to assume his colleagues shared his political assumptions — they did not.", category: "Bias & Perspective" },
+      { word: "Illusion of Control", pronunciation: "ih-LOO-zhun uv kun-TROHL", definition: "Believing one has influence over outcomes that are actually determined by chance", example: "The illusion of control made the traders believe their pre-market rituals affected performance — they didn't.", category: "Bias & Perspective" },
+      { word: "Declinism", pronunciation: "dih-KLY-niz-um", definition: "The belief that a society or institution is in inevitable long-term decline", example: "His declinism made every setback feel like confirmation of an irreversible trend, rather than a correctable problem.", category: "Bias & Perspective" },
+      { word: "Reactance", pronunciation: "ree-AK-tents", definition: "The urge to do the opposite of what one is told when freedom feels threatened", example: "The heavy-handed mandate triggered reactance — employees who might have complied dug in and refused.", category: "Bias & Perspective" },
+      { word: "Bounded Rationality", pronunciation: "BOWN-did rash-uh-NAL-ih-tee", definition: "Decision-making that is rational within the limits of available information and cognitive capacity", example: "Bounded rationality means humans don't optimize — they satisfice, choosing the first option that clears an acceptable bar.", category: "Bias & Perspective" },
+      { word: "Moral Licensing", pronunciation: "MOR-ul LY-sen-sing", definition: "Using a past virtuous act to justify a subsequent less virtuous one", example: "Moral licensing: having donated generously to charity, he felt entitled to take the ethically questionable shortcut.", category: "Bias & Perspective" },
+      { word: "Social Proof", pronunciation: "SOH-shul PROOF", definition: "Assuming that what many people do or believe must be correct", example: "Social proof drove adoption — not the features, but the fact that major competitors were already using it.", category: "Bias & Perspective" },
+      { word: "Loss Aversion", pronunciation: "LAWS uh-VER-zhun", definition: "Experiencing losses as more painful than equivalent gains are pleasurable", example: "Loss aversion explained the irrational decision: the potential downside felt twice as large as an equal upside.", category: "Bias & Perspective" },
+      { word: "Optimism Bias", pronunciation: "OP-tih-miz-um BY-us", definition: "The tendency to overestimate the likelihood of positive outcomes for oneself", example: "Optimism bias made the project team systematically underestimate risks and overestimate projected returns.", category: "Bias & Perspective" },
+
+      // ── Nuance & Complexity ────────────────────────────────────────────────
+      { word: "Equivocal", pronunciation: "ih-KWIV-uh-kul", definition: "Open to multiple interpretations; ambiguous", example: "The CEO's statement was deliberately equivocal, giving investors no clear signal either way.", category: "Nuance & Complexity" },
+      { word: "Heterodox", pronunciation: "HET-er-uh-doks", definition: "Contrary to established or accepted beliefs", example: "Her heterodox view — that less sleep improves some kinds of creativity — ran counter to every study in the field.", category: "Nuance & Complexity" },
+      { word: "Dialectical", pronunciation: "dy-uh-LEK-tih-kul", definition: "Relating to the tension between opposing forces or ideas", example: "The report captured the dialectical tension between efficiency and equity that runs through every policy debate.", category: "Nuance & Complexity" },
+      { word: "Liminal", pronunciation: "LIM-ih-nul", definition: "In between two states; on the threshold of something", example: "The months between graduation and the first job are a liminal period — no longer a student, not yet a professional.", category: "Nuance & Complexity" },
+      { word: "Ambivalent", pronunciation: "am-BIV-uh-lent", definition: "Having simultaneous conflicting feelings or attitudes about something", example: "She was ambivalent about the promotion — excited by the title, dreading the travel.", category: "Nuance & Complexity" },
+      { word: "Inchoate", pronunciation: "in-KOH-it", definition: "Just begun; not yet fully formed or clearly articulated", example: "The startup had an inchoate vision — big ambitions, but no coherent strategy for getting there.", category: "Nuance & Complexity" },
+      { word: "Provisional", pronunciation: "pruh-VIZ-hun-ul", definition: "Temporary or preliminary; subject to revision as new information arrives", example: "The findings are provisional — treat them as a starting point, not a settled conclusion.", category: "Nuance & Complexity" },
+      { word: "Contingent", pronunciation: "kun-TIN-jent", definition: "Dependent on circumstances; possible but not inevitable", example: "Success here is contingent on the regulatory environment, which could change with the next election.", category: "Nuance & Complexity" },
+      { word: "Entropy", pronunciation: "EN-truh-pee", definition: "The tendency of systems to move toward disorder and reduced organization over time", example: "The entropy of the organization became visible after the founders left — processes that once ran smoothly began to decay.", category: "Nuance & Complexity" },
+      { word: "Equilibrium", pronunciation: "ee-kwih-LIB-ree-um", definition: "A state of balance between opposing forces", example: "The market eventually reached equilibrium, but only after years of volatile adjustments.", category: "Nuance & Complexity" },
+      { word: "Feedback Loop", pronunciation: "FEED-bak LOOP", definition: "A cycle where outputs return as inputs, amplifying or dampening the process", example: "The feedback loop between customer complaints and engineer morale created a downward spiral that took months to reverse.", category: "Nuance & Complexity" },
+      { word: "Emergent Property", pronunciation: "ih-MER-jent PROP-er-tee", definition: "A property that arises from a system as a whole, absent from its individual parts", example: "Consciousness may be an emergent property — it arises from neurons, none of which are individually conscious.", category: "Nuance & Complexity" },
+      { word: "Second-Order Effects", pronunciation: "SEK-und-OR-der ih-FEKTS", definition: "The downstream consequences of consequences", example: "They fixed the immediate problem without thinking about second-order effects — the solution created three new ones.", category: "Nuance & Complexity" },
+      { word: "Path Dependency", pronunciation: "PATH dih-PEN-den-see", definition: "The influence of historical decisions on current and future options", example: "Path dependency explained why the company still ran on a legacy system — each year, switching costs made reform harder.", category: "Nuance & Complexity" },
+      { word: "Sui Generis", pronunciation: "SOO-ee JEN-er-is", definition: "Unique; in a class of its own; unlike anything else", example: "The settlement was sui generis — no precedent existed for a case with this particular combination of facts.", category: "Nuance & Complexity" },
+      { word: "Idiosyncratic", pronunciation: "id-ee-oh-sin-KRAT-ik", definition: "Peculiar to an individual; specific to one case rather than a general pattern", example: "The effect was idiosyncratic — observed clearly in one subject, absent in all others.", category: "Nuance & Complexity" },
+      { word: "Commensurate", pronunciation: "kuh-MEN-ser-it", definition: "Proportionate; corresponding in size, degree, or importance", example: "The penalty was commensurate with the offense — serious enough to deter, not so severe as to be disproportionate.", category: "Nuance & Complexity" },
+      { word: "Incommensurable", pronunciation: "in-kuh-MEN-ser-uh-bul", definition: "Lacking any common standard for comparison; impossible to measure against each other", example: "Privacy and security were incommensurable here — there was no neutral unit to weigh one against the other.", category: "Nuance & Complexity" },
+      { word: "Asymmetric", pronunciation: "ay-sih-MET-rik", definition: "Unequal between two sides; lacking equivalence", example: "The information asymmetry between buyer and seller distorted the market and enabled systematic exploitation.", category: "Nuance & Complexity" },
+      { word: "Non-Linear", pronunciation: "non-LIN-ee-er", definition: "Not progressing in a straight, proportional manner; disproportionate at certain ranges", example: "The relationship between dose and effect was non-linear — small increases had little impact until a threshold was crossed.", category: "Nuance & Complexity" },
+      { word: "Stochastic", pronunciation: "stuh-KAS-tik", definition: "Randomly determined; governed by probability rather than fixed rules", example: "The model's stochastic components meant that running it twice never produced exactly the same forecast.", category: "Nuance & Complexity" },
+      { word: "Countervailing", pronunciation: "KOWN-ter-vay-ling", definition: "Opposing or balancing another force", example: "The countervailing pressure from civil society groups slowed the deregulation campaign considerably.", category: "Nuance & Complexity" },
+      { word: "Intractable", pronunciation: "in-TRAK-tuh-bul", definition: "Too complex or deep-rooted to be easily resolved", example: "The conflict had become intractable — the grievances ran deeper than any policy fix could address.", category: "Nuance & Complexity" },
+      { word: "Latent", pronunciation: "LAY-tent", definition: "Present but not yet visible, active, or developed", example: "The latent tensions in the team didn't surface until the pressure of the launch exposed them.", category: "Nuance & Complexity" },
+      { word: "Orthogonal", pronunciation: "or-THOG-uh-nul", definition: "Completely independent and unrelated; having no bearing on each other", example: "The two critiques were orthogonal — one was about process, the other about outcomes, and neither bore on the other.", category: "Nuance & Complexity" },
+      { word: "Epiphenomenon", pronunciation: "ep-ih-fih-NOM-ih-non", definition: "A secondary effect that appears alongside a primary process but may not cause it", example: "Whether stress causes illness or both are epiphenomena of the same lifestyle factors was what the study couldn't resolve.", category: "Nuance & Complexity" },
+      { word: "Threshold Effect", pronunciation: "THRESH-hold ih-FEKT", definition: "A sudden change in outcome once a critical level is reached", example: "There was a threshold effect: below a certain staffing level, quality didn't just decline — it collapsed.", category: "Nuance & Complexity" },
+      { word: "Lacuna", pronunciation: "luh-KYOO-nuh", definition: "A gap or missing section; an absence in evidence or reasoning that matters", example: "The lacuna in the evidence was glaring — no one could account for where the funds had gone during that six-week window.", category: "Nuance & Complexity" },
+      { word: "Granularity", pronunciation: "gran-yoo-LAR-ih-tee", definition: "The level of detail at which something is examined or expressed", example: "At a high level of granularity, the problem seemed solved — but at the transaction level, the errors persisted.", category: "Nuance & Complexity" },
+      { word: "Robustness", pronunciation: "roh-BUS T-ness", definition: "The ability of a model, argument, or system to remain effective under a wide range of conditions", example: "The model's robustness was its main virtue — it performed well even on data it hadn't been trained on.", category: "Nuance & Complexity" },
+
+      // ── Critical Thinking ──────────────────────────────────────────────────
+      { word: "Exegesis", pronunciation: "ek-suh-JEE-sis", definition: "Critical interpretation and explanation of a text or idea", example: "The professor's exegesis of the founding documents ran three lectures and still felt incomplete.", category: "Critical Thinking" },
+      { word: "Hermeneutics", pronunciation: "her-muh-NOO-tiks", definition: "The theory and methodology of interpretation, especially of texts", example: "Legal hermeneutics explains why two judges can read the same law and reach opposite conclusions.", category: "Critical Thinking" },
+      { word: "Counterfactual", pronunciation: "kown-ter-FAK-choo-ul", definition: "Relating to what would have happened under different conditions", example: "The interesting counterfactual is what happens if the vaccine had arrived six months earlier.", category: "Critical Thinking" },
+      { word: "Apophenia", pronunciation: "ap-oh-FEE-nee-uh", definition: "Perceiving meaningful patterns or connections in random, unrelated data", example: "Conspiracy theories often begin with apophenia: seeing a sinister pattern in events that are simply coincidental.", category: "Critical Thinking" },
+      { word: "Epistemology", pronunciation: "ih-pis-tuh-MOL-uh-jee", definition: "The branch of philosophy concerned with the nature and limits of knowledge", example: "Her dissertation addressed a core question in epistemology: how do we know what we claim to know?", category: "Critical Thinking" },
+      { word: "Metacognition", pronunciation: "met-uh-kog-NIH-shun", definition: "Thinking about one's own thinking; awareness of one's own reasoning processes", example: "Metacognition is what separates the expert from the merely knowledgeable — the ability to catch your own errors in real time.", category: "Critical Thinking" },
+      { word: "Steelmanning", pronunciation: "STEEL-man-ing", definition: "Constructing the strongest possible version of an opposing argument before responding to it", example: "Before criticizing the proposal, she steelmanned it — which revealed that one version of it was actually defensible.", category: "Critical Thinking" },
+      { word: "Triangulation", pronunciation: "try-ang-gyuh-LAY-shun", definition: "Cross-checking a conclusion using multiple independent methods or sources", example: "She triangulated the finding across three datasets before publishing — each one confirmed the same pattern.", category: "Critical Thinking" },
+      { word: "Internal Validity", pronunciation: "in-TER-nul vuh-LID-ih-tee", definition: "The degree to which a study accurately reflects causal relationships within its context", example: "The experiment had strong internal validity — the design made it nearly impossible for confounds to explain the results.", category: "Critical Thinking" },
+      { word: "External Validity", pronunciation: "ek-STER-nul vuh-LID-ih-tee", definition: "The degree to which findings generalize beyond the study's specific context", example: "The lab results had questionable external validity — it was unclear whether they would hold in real-world conditions.", category: "Critical Thinking" },
+      { word: "Confounding Variable", pronunciation: "kun-FOWND-ing VAIR-ee-uh-bul", definition: "An unaccounted variable that influences both the cause and the effect under study", example: "Income was a confounding variable — it independently predicted both the behavior and the outcome.", category: "Critical Thinking" },
+      { word: "Selection Bias", pronunciation: "seh-LEK-shun BY-us", definition: "Error introduced when the sample studied is not representative of the target population", example: "The survey suffered from selection bias — only people who felt strongly enough had bothered to respond.", category: "Critical Thinking" },
+      { word: "Effect Size", pronunciation: "ih-FEKT SYZ", definition: "The magnitude of a relationship or difference, independent of statistical significance", example: "The effect size was tiny — statistically significant because of the enormous sample, but practically irrelevant.", category: "Critical Thinking" },
+      { word: "Statistical Significance", pronunciation: "stuh-TIS-tih-kul sig-NIH-fih-kents", definition: "The probability that a result is not due to chance, based on a chosen threshold", example: "Statistical significance tells you the result is probably real — it says nothing about whether it matters.", category: "Critical Thinking" },
+      { word: "P-Hacking", pronunciation: "PEE-hak-ing", definition: "Manipulating data or analysis until a statistically significant result appears", example: "P-hacking explained the proliferation of surprising findings that consistently failed to replicate in other labs.", category: "Critical Thinking" },
+      { word: "Bayesian Reasoning", pronunciation: "BAY-zee-un REE-zun-ing", definition: "Updating one's beliefs in proportion to the strength of new evidence", example: "Bayesian reasoning meant he didn't overreact to one study — he updated proportionally to how surprising and well-powered it was.", category: "Critical Thinking" },
+      { word: "Base Rate", pronunciation: "BAYS RAYT", definition: "The background frequency of an event in the general population", example: "Ignoring the base rate, she treated one positive test as near-certain — without knowing how common false positives were.", category: "Critical Thinking" },
+      { word: "Regression to the Mean", pronunciation: "rih-GRESH-un too thuh MEEN", definition: "The tendency of extreme values to move toward the average over time", example: "The team's poor performance after a championship run was regression to the mean, not a sign of underlying decline.", category: "Critical Thinking" },
+      { word: "Null Hypothesis", pronunciation: "NUL hy-POTH-ih-sis", definition: "The default assumption that there is no effect or relationship to be found", example: "Failing to reject the null hypothesis doesn't prove there's no effect — it means the data wasn't strong enough to detect one.", category: "Critical Thinking" },
+      { word: "Ecological Fallacy", pronunciation: "ee-kuh-LOJ-ih-kul FAL-uh-see", definition: "Drawing conclusions about individuals from group-level data", example: "The ecological fallacy: because wealthy districts voted one way doesn't mean all wealthy voters did.", category: "Critical Thinking" },
+      { word: "Mental Model", pronunciation: "MEN-tul MOD-ul", definition: "An internal representation of how something works, used to reason about it", example: "Her mental model of the market was twenty years out of date — it explained decisions that otherwise seemed inexplicable.", category: "Critical Thinking" },
+      { word: "Calibration", pronunciation: "kal-ih-BRAY-shun", definition: "Aligning one's stated confidence with actual accuracy across many predictions", example: "Good forecasters are well-calibrated: when they say they're 70% confident, they're right about 70% of the time.", category: "Critical Thinking" },
+      { word: "Epistemic Humility", pronunciation: "ep-ih-STEE-mik hyoo-MIL-ih-tee", definition: "Recognizing the limits and fallibility of one's own knowledge", example: "Epistemic humility meant she published with explicit uncertainty ranges, not a single confident point estimate.", category: "Critical Thinking" },
+      { word: "Tacit Knowledge", pronunciation: "TAS-it NOL-ij", definition: "Knowledge embedded in practice and experience that is difficult to articulate or transfer", example: "The retiring engineer carried tacit knowledge that no manual captured — and no one had thought to document.", category: "Critical Thinking" },
+      { word: "Praxis", pronunciation: "PRAK-sis", definition: "The translation of theory into practical action; practice as distinct from theory", example: "The gap between the policy's stated principles and its praxis in the field was enormous.", category: "Critical Thinking" },
+      { word: "First-Principles Thinking", pronunciation: "FERST-PRIN-sih-pulz THINK-ing", definition: "Reasoning up from fundamental truths rather than by analogy or convention", example: "First-principles thinking led the engineer to question the assumption that the housing needed to be cylindrical at all.", category: "Critical Thinking" },
+      { word: "Peer Review", pronunciation: "PEER rih-VYOO", definition: "Evaluation of research by qualified others in the same field before publication", example: "The findings hadn't survived peer review yet — treating them as settled science would be premature.", category: "Critical Thinking" },
+      { word: "Replication", pronunciation: "rep-lih-KAY-shun", definition: "Repeating a study independently to verify its results hold", example: "Many psychology findings failed replication — the results hadn't held up when other labs tried to reproduce them.", category: "Critical Thinking" },
+
+      // ── Language & Rhetoric ────────────────────────────────────────────────
+      { word: "Euphemism", pronunciation: "YOO-fuh-miz-um", definition: "A mild or indirect word used in place of something blunt or unpleasant", example: "Calling layoffs a 'workforce realignment' is a euphemism that does nothing to soften the blow for those affected.", category: "Language & Rhetoric" },
+      { word: "Laconic", pronunciation: "luh-KON-ik", definition: "Using very few words; brief and to the point", example: "His email reply was characteristically laconic: just 'No. Try again.'", category: "Language & Rhetoric" },
+      { word: "Circumlocution", pronunciation: "ser-kum-loh-KYOO-shun", definition: "Using many words where fewer would suffice; roundabout expression", example: "Rather than say 'no,' he used such elaborate circumlocution that she left the meeting unsure what he'd actually decided.", category: "Language & Rhetoric" },
+      { word: "Logos", pronunciation: "LOH-gos", definition: "Persuasion through logic and reason", example: "His logos was impeccable — the argument was logically airtight even if it lacked emotional resonance.", category: "Language & Rhetoric" },
+      { word: "Ethos", pronunciation: "EE-thos", definition: "Persuasion through the credibility and character of the speaker", example: "Her ethos was built over a decade of honest reporting — which made her eventual endorsement extraordinarily valuable.", category: "Language & Rhetoric" },
+      { word: "Pathos", pronunciation: "PAY-thos", definition: "Persuasion through emotional appeal", example: "The speech relied heavily on pathos: vivid personal stories that bypassed analytical resistance entirely.", category: "Language & Rhetoric" },
+      { word: "Polemic", pronunciation: "puh-LEM-ik", definition: "A strong written or verbal attack on a belief or position", example: "Her polemic against the proposed changes was so forceful it shifted the committee's vote.", category: "Language & Rhetoric" },
+      { word: "Diatribe", pronunciation: "DY-uh-tryb", definition: "A lengthy and forceful verbal attack", example: "What began as a measured press statement turned into a ten-minute diatribe against the opposition.", category: "Language & Rhetoric" },
+      { word: "Apologia", pronunciation: "ap-uh-LOH-jee-uh", definition: "A formal defense of one's position or actions; a justification, not an apology", example: "The CEO's statement was not an apology but an apologia — a justification of every decision that led to the crisis.", category: "Language & Rhetoric" },
+      { word: "Invective", pronunciation: "in-VEK-tiv", definition: "Harsh, abusive language directed at someone", example: "The invective in the editorial was striking — it moved well beyond argument into personal attack.", category: "Language & Rhetoric" },
+      { word: "Pejorative", pronunciation: "pih-JOR-uh-tiv", definition: "Expressing contempt or disapproval; having a belittling connotation", example: "Calling it a 'bailout' rather than a 'rescue package' was a pejorative choice that shaped public reaction.", category: "Language & Rhetoric" },
+      { word: "Connotation", pronunciation: "kon-uh-TAY-shun", definition: "The emotional or cultural associations of a word beyond its literal meaning", example: "The report chose 'challenge' over 'problem' — a connotation difference that softened the severity of the findings.", category: "Language & Rhetoric" },
+      { word: "Denotation", pronunciation: "dee-noh-TAY-shun", definition: "The literal, dictionary meaning of a word", example: "The denotation of 'home' is simply a place of residence; the connotations run vastly deeper.", category: "Language & Rhetoric" },
+      { word: "Dog Whistle", pronunciation: "DOG WIS-ul", definition: "Language that carries a coded meaning understood only by a specific group", example: "The phrase was innocuous on its face but functioned as a dog whistle to those who recognized its history.", category: "Language & Rhetoric" },
+      { word: "Weasel Word", pronunciation: "WEE-zul WERD", definition: "Vague or ambiguous language used to avoid commitment or accountability", example: "The policy statement was full of weasel words — 'may consider,' 'in appropriate circumstances' — that committed to nothing.", category: "Language & Rhetoric" },
+      { word: "Doublespeak", pronunciation: "DUB-ul-speek", definition: "Language designed to obscure or mislead while appearing to communicate clearly", example: "Calling civilian casualties 'collateral damage' is doublespeak that distances language from the reality it describes.", category: "Language & Rhetoric" },
+      { word: "Loaded Question", pronunciation: "LOH-did KWES-chun", definition: "A question that embeds a controversial assumption the respondent must implicitly accept", example: "The loaded question — 'when did you stop misleading investors?' — presumed guilt regardless of the answer given.", category: "Language & Rhetoric" },
+      { word: "Irony", pronunciation: "EYE-ruh-nee", definition: "Using words to convey the opposite of their literal meaning; or events that reverse expectations", example: "The irony of the anti-surveillance advocate being caught on camera was lost on no one in the room.", category: "Language & Rhetoric" },
+      { word: "Sarcasm", pronunciation: "SAR-kaz-um", definition: "Sharp, often cutting irony used to mock or convey contempt", example: "Her sarcasm was unmistakable: 'Oh great, another meeting to plan the outcome of the last meeting.'", category: "Language & Rhetoric" },
+      { word: "Understatement", pronunciation: "UN-der-stayt-ment", definition: "Deliberately describing something as less significant than it is", example: "Calling the company's complete collapse 'a setback' was a profound understatement.", category: "Language & Rhetoric" },
+      { word: "Allegory", pronunciation: "AL-ih-gor-ee", definition: "A narrative where characters and events symbolically represent abstract ideas or real situations", example: "Orwell's Animal Farm is an allegory for Stalinist communism — the farm, the pigs, and the revolution all stand for real historical forces.", category: "Language & Rhetoric" },
+      { word: "Allusion", pronunciation: "uh-LOO-zhun", definition: "An indirect reference to a person, event, or work assumed to be familiar to the audience", example: "The campaign slogan was an allusion to Kennedy — deliberate, and not subtle to anyone who recognized it.", category: "Language & Rhetoric" },
+      { word: "Innuendo", pronunciation: "in-yoo-EN-doh", definition: "A hint or insinuation, especially one implying something discreditable", example: "The report stopped short of accusing anyone directly, but the innuendo was unmistakable to anyone reading carefully.", category: "Language & Rhetoric" },
+      { word: "Syllepsis", pronunciation: "sih-LEP-sis", definition: "Using a single word to govern two others in grammatically or logically different senses", example: "The syllepsis 'she lost her keys and her temper' uses 'lost' in two very different senses simultaneously.", category: "Language & Rhetoric" },
+      { word: "Zeugma", pronunciation: "ZOOG-muh", definition: "A figure where one word applies to two others in different, sometimes incongruous, senses", example: "The zeugma 'he caught the bus and a cold' links one verb to two grammatically parallel but semantically mismatched objects.", category: "Language & Rhetoric" },
+      { word: "Aposiopesis", pronunciation: "uh-pos-ee-uh-PEE-sis", definition: "Deliberately breaking off mid-sentence for dramatic or rhetorical effect", example: "The speech deployed aposiopesis at its peak: 'If you betray this team again, so help me—' — and the room went silent.", category: "Language & Rhetoric" },
+      { word: "Anachronism", pronunciation: "uh-NAK-ruh-niz-um", definition: "Something placed in a historical period where it does not belong", example: "The novel's use of smartphones in a 1940s setting was an anachronism that broke the reader's immersion.", category: "Language & Rhetoric" },
+      { word: "Bathos", pronunciation: "BAY-thos", definition: "An abrupt, jarring descent from the elevated to the trivial", example: "The eulogy achieved bathos when the speaker pivoted from soaring tribute to a joke about parking validation.", category: "Language & Rhetoric" },
+      { word: "Asyndeton", pronunciation: "uh-SIN-dih-ton", definition: "Omitting conjunctions between successive words or clauses for rhetorical effect", example: "The speech's asyndeton — 'we came, we saw, we conquered' — gave it a breathless, decisive rhythm.", category: "Language & Rhetoric" },
+      { word: "Polysyndeton", pronunciation: "pol-ee-SIN-dih-ton", definition: "Using more conjunctions than necessary to create a cumulative, deliberate effect", example: "The polysyndeton of 'and the rain and the wind and the cold' mimics the relentless nature of the storm.", category: "Language & Rhetoric" },
+      { word: "Epistrophe", pronunciation: "ih-PIS-truh-fee", definition: "Repetition of a word or phrase at the end of successive clauses", example: "Lincoln's epistrophe — 'of the people, by the people, for the people' — gave the phrase its unforgettable, hammering rhythm.", category: "Language & Rhetoric" },
+      { word: "Anadiplosis", pronunciation: "an-uh-dih-PLOH-sis", definition: "Repeating the last word of one clause as the first word of the next", example: "The anadiplosis built intensity: 'Fear leads to anger, anger leads to hate, hate leads to suffering.'", category: "Language & Rhetoric" },
+      { word: "Amplification", pronunciation: "am-plih-fih-KAY-shun", definition: "Expanding a statement by adding detail, qualification, or force for emphasis", example: "Her amplification of the original proposal — adding case studies and historical precedent — made it far more persuasive.", category: "Language & Rhetoric" },
+      { word: "Solecism", pronunciation: "SOL-ih-siz-um", definition: "A grammatical error or breach of established usage", example: "The solecism 'between you and I' appears so often in formal speech that some linguists have stopped calling it an error.", category: "Language & Rhetoric" },
+      { word: "Prosaic", pronunciation: "proh-ZAY-ik", definition: "Commonplace, ordinary, or lacking imagination", example: "The explanation turned out to be prosaic — a simple data entry error, not the conspiracy anyone had suspected.", category: "Language & Rhetoric" },
+      { word: "Ameliorative", pronunciation: "uh-MEEL-yuh-ray-tiv", definition: "Describing a word or meaning that has shifted toward a more positive connotation over time", example: "The word 'queer' has undergone an ameliorative reclamation — moving from slur to an identity term claimed with pride.", category: "Language & Rhetoric" },
+    ];
+
+    const categoryColors = {
+      "Arguments & Reasoning": { bg: "#1a1a2e", accent: "#e94560", label: "#e94560" },
+      "Ideas & Claims":        { bg: "#0f2027", accent: "#00b4d8", label: "#00b4d8" },
+      "Bias & Perspective":    { bg: "#1a0a2e", accent: "#c77dff", label: "#c77dff" },
+      "Nuance & Complexity":   { bg: "#0a1f1a", accent: "#52b788", label: "#52b788" },
+      "Critical Thinking":     { bg: "#1f1a0a", accent: "#f4a261", label: "#f4a261" },
+      "Language & Rhetoric":   { bg: "#0a1a1f", accent: "#48cae4", label: "#48cae4" },
+    };
+
+    function Flashcards() {
+      const [index, setIndex] = useState(0);
+      const [flipped, setFlipped] = useState(false);
+      const [filter, setFilter] = useState("All");
+      const [mode, setMode] = useState("study");
+      const [userInput, setUserInput] = useState("");
+      const [inputResult, setInputResult] = useState(null);
+      const [direction, setDirection] = useState(null);
+      const inputRef = useRef(null);
+
+      const [confidence, setConfidence] = useState(() => {
+        try {
+          const saved = localStorage.getItem("flashcard-confidence");
+          if (saved) return JSON.parse(saved);
+        } catch {}
+        return {};
+      });
+
+      const [dailyWords] = useState(() => {
+        const todayKey = getTodayKey();
+        try {
+          const cached = localStorage.getItem(`flashcard-daily-${todayKey}`);
+          if (cached) {
+            const parsed = JSON.parse(cached);
+            return parsed.map(w => {
+              const live = words.find(cw => cw.word === w.word);
+              return live ? { ...w, pronunciation: live.pronunciation, example: live.example } : w;
+            });
+          }
+        } catch {}
+        const masteredWords = new Set(
+          Object.entries(confidence).filter(([, v]) => v >= 3).map(([k]) => k)
+        );
+        const nonMastered = shuffle(words.filter(w => !masteredWords.has(w.word)));
+        const masteredArr = shuffle(words.filter(w => masteredWords.has(w.word)));
+        const todaySet = [
+          ...nonMastered.slice(0, 15),
+          ...masteredArr.slice(0, 3).map(w => ({ ...w, isReview: true })),
+        ];
+        try {
+          localStorage.setItem(`flashcard-daily-${todayKey}`, JSON.stringify(todaySet));
+        } catch {}
+        return todaySet;
+      });
+
+      useEffect(() => {
+        try { localStorage.setItem("flashcard-confidence", JSON.stringify(confidence)); } catch {}
+      }, [confidence]);
+
+      useEffect(() => { setFlipped(false); setUserInput(""); setInputResult(null); }, [mode]);
+
+      useEffect(() => {
+        if (mode === "recall" && !flipped && inputRef.current) {
+          setTimeout(() => inputRef.current?.focus(), 60);
+        }
+      }, [mode, flipped, index]);
+
+      const categories = ["All", ...Object.keys(categoryColors).filter(cat => dailyWords.some(w => w.category === cat))];
+      const filtered = filter === "All" ? dailyWords : dailyWords.filter(w => w.category === filter);
+      const card = filtered[index] ?? filtered[0];
+      const colors = categoryColors[card?.category] ?? categoryColors["Arguments & Reasoning"];
+      const cardConfidence = confidence[card?.word] ?? 0;
+      const masteredCount = Object.values(confidence).filter(v => v >= 3).length;
+
+      function go(dir) {
+        setDirection(dir);
+        setFlipped(false);
+        setUserInput("");
+        setInputResult(null);
+        setTimeout(() => {
+          setIndex(i => dir === "next" ? (i + 1) % filtered.length : (i - 1 + filtered.length) % filtered.length);
+          setDirection(null);
+        }, 200);
+      }
+
+      function checkAnswer() {
+        const correct = userInput.trim().toLowerCase() === card.word.toLowerCase();
+        setInputResult(correct ? "correct" : "wrong");
+        setFlipped(true);
+      }
+
+      function rateCard(rating) {
+        setConfidence(prev => ({ ...prev, [card.word]: rating }));
+      }
+
+      useEffect(() => {
+        function handleKey(e) {
+          if (e.key === "ArrowRight") { go("next"); return; }
+          if (e.key === "ArrowLeft")  { go("prev"); return; }
+          if (mode === "study" && !flipped && (e.key === " " || e.key === "ArrowUp" || e.key === "ArrowDown")) {
+            e.preventDefault(); setFlipped(true);
+          } else if (mode === "study" && flipped && (e.key === " " || e.key === "ArrowUp" || e.key === "ArrowDown")) {
+            e.preventDefault(); setFlipped(false);
+          } else if (mode === "recall" && e.key === "Enter" && !flipped && userInput.trim()) {
+            e.preventDefault(); checkAnswer();
+          } else if (flipped && ["1","2","3","4"].includes(e.key)) {
+            rateCard(parseInt(e.key));
+          }
+        }
+        window.addEventListener("keydown", handleKey);
+        return () => window.removeEventListener("keydown", handleKey);
+      }, [filtered, index, card, mode, flipped, userInput]);
+
+      return (
+        <div style={{ minHeight: "100vh", background: "#0d0d0d", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "24px 16px", fontFamily: "'Georgia', 'Times New Roman', serif" }}>
+          <style>{`
+            @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Mono:wght@400;500&display=swap');
+            * { box-sizing: border-box; }
+            .card-wrap { perspective: 1200px; }
+            .card-inner { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; transition: transform 0.55s cubic-bezier(0.4, 0, 0.2, 1); }
+            .card-inner.flipped { transform: rotateY(180deg); }
+            .card-face { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; border-radius: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 36px 32px; }
+            .card-back { transform: rotateY(180deg); }
+            .slide-left  { animation: slideLeft  0.2s ease forwards; }
+            .slide-right { animation: slideRight 0.2s ease forwards; }
+            @keyframes slideLeft  { to { opacity: 0; transform: translateX(-30px); } }
+            @keyframes slideRight { to { opacity: 0; transform: translateX(30px);  } }
+            .nav-btn { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: #fff; width: 48px; height: 48px; border-radius: 50%; font-size: 20px; cursor: pointer; transition: background 0.2s, border 0.2s; display: flex; align-items: center; justify-content: center; }
+            .nav-btn:hover { background: rgba(255,255,255,0.14); border-color: rgba(255,255,255,0.28); }
+            .cat-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.55); padding: 6px 14px; border-radius: 20px; font-size: 11px; letter-spacing: 0.08em; cursor: pointer; font-family: 'DM Mono', monospace; transition: all 0.2s; white-space: nowrap; }
+            .cat-btn.active { color: #fff; border-color: rgba(255,255,255,0.4); background: rgba(255,255,255,0.12); }
+            .mode-btn { background: transparent; border: 1px solid rgba(255,255,255,0.15); color: rgba(255,255,255,0.4); padding: 5px 16px; border-radius: 16px; font-size: 11px; letter-spacing: 0.1em; cursor: pointer; font-family: 'DM Mono', monospace; transition: all 0.2s; text-transform: uppercase; }
+            .mode-btn.active { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.35); color: #fff; }
+            .recall-input { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.2); border-radius: 10px; color: #fff; font-size: 18px; font-family: 'Playfair Display', serif; padding: 10px 16px; width: 100%; max-width: 300px; text-align: center; outline: none; transition: border-color 0.2s; }
+            .recall-input:focus { border-color: rgba(255,255,255,0.45); }
+            .recall-input.correct { border-color: #52b788; color: #52b788; }
+            .recall-input.wrong   { border-color: #e94560; }
+            .check-btn { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 7px 20px; border-radius: 20px; font-size: 12px; font-family: 'DM Mono', monospace; letter-spacing: 0.08em; cursor: pointer; margin-top: 10px; transition: all 0.2s; }
+            .check-btn:hover { background: rgba(255,255,255,0.14); }
+            .rating-btn { border: 1px solid; padding: 5px 12px; border-radius: 14px; font-size: 11px; font-family: 'DM Mono', monospace; letter-spacing: 0.05em; cursor: pointer; background: transparent; transition: all 0.15s; }
+            .rating-btn:hover { filter: brightness(1.2); }
+          `}</style>
+
+          <div style={{ textAlign: "center", marginBottom: 20 }}>
+            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 13, letterSpacing: "0.25em", color: "rgba(255,255,255,0.35)", textTransform: "uppercase", marginBottom: 6 }}>Analysis Vocabulary</div>
+            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, fontWeight: 900, color: "#fff", letterSpacing: "-0.01em" }}>Today's Practice</div>
+            <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, color: "rgba(255,255,255,0.25)", letterSpacing: "0.1em", marginTop: 6, marginBottom: 14 }}>
+              {dailyWords.filter(w => !w.isReview).length} new &nbsp;·&nbsp; {dailyWords.filter(w => w.isReview).length} review
+            </div>
+            <div style={{ display: "flex", gap: 6, justifyContent: "center" }}>
+              <button className={`mode-btn${mode === "study"  ? " active" : ""}`} onClick={() => setMode("study")}>Study</button>
+              <button className={`mode-btn${mode === "recall" ? " active" : ""}`} onClick={() => setMode("recall")}>Recall</button>
+            </div>
+          </div>
+
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "center", marginBottom: 24, maxWidth: 560 }}>
+            {categories.map(cat => (
+              <button key={cat} className={`cat-btn${filter === cat ? " active" : ""}`}
+                onClick={() => { setFilter(cat); setIndex(0); setFlipped(false); setUserInput(""); setInputResult(null); }}>
+                {cat === "All" ? "All" : cat.split(" ")[0]}
+              </button>
+            ))}
+          </div>
+
+          <div className={`card-wrap${direction ? ` slide-${direction === "next" ? "left" : "right"}` : ""}`}
+            style={{ width: "min(500px, 100%)", height: 360 }}>
+            <div className={`card-inner${flipped ? " flipped" : ""}`}>
+
+              <div className="card-face"
+                style={{ background: colors.bg, border: `1px solid ${colors.accent}30`, cursor: mode === "study" ? "pointer" : "default" }}
+                onClick={mode === "study" ? () => setFlipped(f => !f) : undefined}>
+                <div style={{ position: "absolute", top: 18, left: 22, fontSize: 10, fontFamily: "'DM Mono', monospace", letterSpacing: "0.18em", color: colors.accent, textTransform: "uppercase" }}>{card?.category}</div>
+                <div style={{ position: "absolute", top: 16, right: 18, display: "flex", gap: 6, alignItems: "center" }}>
+                  {card?.isReview && <div style={{ fontSize: 9, fontFamily: "'DM Mono', monospace", letterSpacing: "0.15em", color: colors.accent, textTransform: "uppercase", border: `1px solid ${colors.accent}70`, padding: "2px 7px", borderRadius: 10 }}>review</div>}
+                  {cardConfidence > 0 && <div style={{ fontSize: 10, fontFamily: "'DM Mono', monospace", color: RATINGS[cardConfidence - 1]?.color, opacity: 0.75 }}>{cardConfidence}/4</div>}
+                </div>
+                {mode === "study" ? (
+                  <>
+                    <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 38, fontWeight: 700, color: "#fff", textAlign: "center", lineHeight: 1.1, marginBottom: 8 }}>{card?.word}</div>
+                    <div style={{ fontSize: 13, fontFamily: "'DM Mono', monospace", color: colors.accent, opacity: 0.6, letterSpacing: "0.05em", fontStyle: "italic", marginBottom: 20, textAlign: "center" }}>{card?.pronunciation}</div>
+                    <div style={{ fontSize: 11, fontFamily: "'DM Mono', monospace", color: "rgba(255,255,255,0.28)", letterSpacing: "0.12em" }}>space to flip · ← → to navigate</div>
+                  </>
+                ) : (
+                  <>
+                    <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 16, color: "rgba(255,255,255,0.82)", textAlign: "center", lineHeight: 1.55, maxWidth: 340, marginBottom: 16, fontStyle: "italic" }}>{card?.definition}</div>
+                    <input ref={inputRef} className={`recall-input${inputResult ? ` ${inputResult}` : ""}`} type="text" placeholder="type the word…" value={userInput}
+                      onChange={e => setUserInput(e.target.value)}
+                      onKeyDown={e => { if (e.key === "Enter" && userInput.trim()) { e.preventDefault(); checkAnswer(); } }}
+                      disabled={flipped} onClick={e => e.stopPropagation()} />
+                    {!flipped && <button className="check-btn" onClick={e => { e.stopPropagation(); if (userInput.trim()) checkAnswer(); }}>Check →</button>}
+                    <div style={{ fontSize: 10, fontFamily: "'DM Mono', monospace", color: "rgba(255,255,255,0.2)", letterSpacing: "0.1em", marginTop: 10 }}>enter to check · ← → to navigate</div>
+                  </>
+                )}
+              </div>
+
+              <div className="card-face card-back"
+                style={{ background: colors.bg, border: `1px solid ${colors.accent}50`, padding: "28px 32px", cursor: mode === "study" ? "pointer" : "default" }}
+                onClick={mode === "study" ? () => setFlipped(false) : undefined}>
+                <div style={{ marginBottom: 2, textAlign: "center" }}>
+                  <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 15, color: "rgba(255,255,255,0.5)", fontStyle: "italic" }}>{card?.word}</span>
+                  {inputResult === "correct" && <span style={{ marginLeft: 8, fontSize: 13, color: "#52b788" }}>✓ correct</span>}
+                  {inputResult === "wrong"   && <span style={{ marginLeft: 8, fontSize: 11, fontFamily: "'DM Mono', monospace", color: "#e94560" }}>you wrote: {userInput}</span>}
+                </div>
+                <div style={{ fontSize: 11, fontFamily: "'DM Mono', monospace", color: colors.accent, opacity: 0.55, letterSpacing: "0.05em", fontStyle: "italic", marginBottom: 10, textAlign: "center" }}>{card?.pronunciation}</div>
+                <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 17, color: "#fff", textAlign: "center", lineHeight: 1.5, maxWidth: 380, marginBottom: 8 }}>{card?.definition}</div>
+                <div style={{ fontSize: 12, fontFamily: "'Playfair Display', serif", fontStyle: "italic", color: "rgba(255,255,255,0.36)", textAlign: "center", lineHeight: 1.55, maxWidth: 380, marginBottom: 14 }}>"{card?.example}"</div>
+                <div style={{ display: "flex", gap: 6, flexWrap: "wrap", justifyContent: "center" }}>
+                  {RATINGS.map(r => (
+                    <button key={r.value} className="rating-btn"
+                      style={{ borderColor: r.color, color: cardConfidence === r.value ? "#000" : r.color, background: cardConfidence === r.value ? r.color : "transparent" }}
+                      onClick={e => { e.stopPropagation(); rateCard(r.value); }}>
+                      {r.value} · {r.label}
+                    </button>
+                  ))}
+                </div>
+                <div style={{ fontSize: 10, fontFamily: "'DM Mono', monospace", color: "rgba(255,255,255,0.18)", letterSpacing: "0.1em", marginTop: 8 }}>1–4 keys to rate</div>
+              </div>
+            </div>
+          </div>
+
+          <div style={{ display: "flex", alignItems: "center", gap: 24, marginTop: 24 }}>
+            <button className="nav-btn" onClick={() => go("prev")}>←</button>
+            <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 13, color: "rgba(255,255,255,0.4)", minWidth: 70, textAlign: "center" }}>
+              {(index % filtered.length) + 1} / {filtered.length}
+            </div>
+            <button className="nav-btn" onClick={() => go("next")}>→</button>
+          </div>
+
+          <div style={{ marginTop: 18, fontFamily: "'DM Mono', monospace", fontSize: 11, letterSpacing: "0.12em", color: "rgba(255,255,255,0.25)", textAlign: "center" }}>
+            {masteredCount} mastered (≥3) &nbsp;·&nbsp; {words.length} in bank
+          </div>
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<Flashcards />);
+  </script>
+</body>
+</html>

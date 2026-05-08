@@ -1,0 +1,9 @@
+# SSH deploy key — never push this
+.ssh/deploy_key
+.ssh/deploy_key.pub
+
+# Token fallback — never push this
+.env
+
+# macOS
+.DS_Store
