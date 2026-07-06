@@ -188,3 +188,248 @@ This file serves as a log of every word added to your deck, organized by date.
 - [ ] **Immanent** — Existing or operating within something; inherent rather than external *(Nuance & Complexity)*
 - [ ] **Analogical** — Based on analogy or comparison between structurally similar cases *(Critical Thinking)*
 - [ ] **Polysemous** — A word or phrase having multiple distinct but related meanings *(Language & Rhetoric)*
+
+---
+
+### May 8, 2026
+
+- [ ] **Pedantic** — Overly focused on minor details and technicalities at the expense of the bigger picture *(Ideas & Claims)*
+- [ ] **Oblique** — Indirect; not approaching a subject or problem directly *(Nuance & Complexity)*
+- [ ] **Synthesis** — Combining distinct elements or ideas into a new, coherent whole *(Critical Thinking)*
+- [ ] **Litotes** — Understatement that affirms something by negating its opposite *(Language & Rhetoric)*
+- [ ] **Hyperbole** — Deliberate exaggeration for emphasis, drama, or comic effect *(Language & Rhetoric)*
+
+---
+
+### May 9, 2026
+
+- [ ] **Didactic** — Intended to teach or instruct, sometimes in an overly moralistic way *(Ideas & Claims)*
+- [ ] **Categorical** — Absolute and unconditional; admitting no exceptions *(Critical Thinking)*
+- [ ] **Heuristics** — Mental shortcuts and rules of thumb that speed up decision-making *(Critical Thinking)*
+- [ ] **Aphorism** — A concise, pithy statement expressing a general truth or principle *(Language & Rhetoric)*
+- [ ] **Prolix** — Using an excessively large number of words; tediously long-winded *(Language & Rhetoric)*
+
+---
+
+### May 10, 2026
+
+- [ ] **Pleonasm** — Using more words than necessary to express an idea *(Language & Rhetoric)*
+- [ ] **Malapropism** — Mistaken use of a word in place of a similar-sounding one *(Language & Rhetoric)*
+
+---
+
+### May 11, 2026
+
+- [ ] **Pellucid** — Transparently clear and easy to understand *(Arguments & Reasoning)*
+- [ ] **Nascent** — Just beginning to exist or develop; not yet fully formed *(Ideas & Claims)*
+- [ ] **Jaundiced** — Cynically biased; colored by resentment or bitter experience *(Bias & Perspective)*
+- [ ] **Tenuous** — Very weak or slight; not firmly grounded or supported *(Nuance & Complexity)*
+- [ ] **Lapidary** — Elegant and concise; having the precision and polish of a carved inscription *(Language & Rhetoric)*
+
+---
+
+### May 12, 2026
+
+- [ ] **Discursive** — Tending to digress; moving through topics without tight logical structure *(Arguments & Reasoning)*
+- [ ] **Jejune** — Naively simplistic; lacking depth, nuance, or intellectual substance *(Ideas & Claims)*
+- [ ] **Hagiographic** — Excessively admiring; uncritically worshipful of a subject *(Bias & Perspective)*
+- [ ] **Paradoxical** — Seemingly self-contradictory yet possibly true *(Nuance & Complexity)*
+- [ ] **Trenchant** — Vigorously incisive; sharp and effective in analysis or criticism *(Critical Thinking)*
+
+---
+
+### May 13, 2026
+
+- [ ] **Polemical** — Relating to strong written or verbal attack on another's opinions or principles *(Arguments & Reasoning)*
+- [ ] **Iconoclastic** — Challenging or attacking cherished beliefs or established institutions *(Ideas & Claims)*
+- [ ] **Sanguine** — Optimistic to a fault, especially when circumstances don't warrant it *(Bias & Perspective)*
+- [ ] **Ineffable** — Too great, complex, or extreme to be expressed in words *(Nuance & Complexity)*
+- [ ] **Erudite** — Having or showing extensive knowledge acquired from reading and study *(Critical Thinking)*
+
+---
+
+### June 4, 2026
+
+- [ ] **Plausible** — Seemingly reasonable or probable, though not confirmed by evidence *(Arguments & Reasoning)*
+- [ ] **Anodyne** — Unlikely to cause controversy; blandly inoffensive *(Ideas & Claims)*
+- [ ] **Blinkered** — Having a severely limited outlook; willfully narrow in perspective *(Bias & Perspective)*
+- [ ] **Labyrinthine** — Intricately complex; bewilderingly complicated *(Nuance & Complexity)*
+- [ ] **Incisive** — Intelligently analytical; penetrating directly to the heart of a matter *(Critical Thinking)*
+
+---
+
+### June 9, 2026
+
+- [ ] **Speculative** — Based on conjecture rather than firm evidence *(Arguments & Reasoning)*
+- [ ] **Contentious** — Causing or likely to cause argument or disagreement *(Ideas & Claims)*
+- [ ] **Quixotic** — Exceedingly idealistic and impractical; chasing unrealistic goals *(Bias & Perspective)*
+- [ ] **Protean** — Readily taking on different forms; versatile and constantly changing *(Nuance & Complexity)*
+- [ ] **Mellifluous** — Pleasingly smooth and musical; sweet-sounding and flowing in expression *(Language & Rhetoric)*
+
+---
+
+### June 10, 2026
+
+- [ ] **Vacuous** — Lacking substance; intellectually hollow or devoid of meaningful content *(Arguments & Reasoning)*
+- [ ] **Nebulous** — Unclear and vague; lacking definite form or specificity *(Ideas & Claims)*
+- [ ] **Sanctimonious** — Making an ostentatious display of moral superiority *(Bias & Perspective)*
+- [ ] **Intractable** — Stubbornly persistent; resistant to resolution or management *(Nuance & Complexity)*
+- [ ] **Bombastic** — High-sounding but with little real meaning; inflated and pompous in style *(Language & Rhetoric)*
+
+---
+
+### June 12, 2026
+
+- [ ] **Latent** — Present but not yet manifest or active; hidden beneath the surface *(Nuance & Complexity)*
+- [ ] **Circumspect** — Careful to consider all circumstances and potential consequences before acting *(Critical Thinking)*
+- [ ] **Grandiloquent** — Using pompous, inflated language that exceeds what the situation requires *(Language & Rhetoric)*
+- [ ] **Platitudinous** — Full of overused, trite statements that have lost all meaning *(Ideas & Claims)*
+- [ ] **Supercilious** — Disdainfully dismissive of others; behaving as if one is superior *(Bias & Perspective)*
+
+---
+
+### June 14, 2026
+
+- [ ] **Irrefutable** — Impossible to deny, challenge, or disprove *(Arguments & Reasoning)*
+- [ ] **Chimerical** — Wildly fanciful; based on unrealistic illusion rather than genuine possibility *(Ideas & Claims)*
+- [ ] **Doctrinaire** — Rigidly applying abstract theories without regard for practical reality *(Bias & Perspective)*
+- [ ] **Fraught** — Filled with tension, difficulty, or potential for trouble *(Nuance & Complexity)*
+- [ ] **Mordant** — Biting, sarcastic, and sharply critical in expression *(Language & Rhetoric)*
+
+---
+
+### June 15, 2026
+
+- [ ] **Incontrovertible** — Too certain to be disputed; unquestionably established *(Arguments & Reasoning)*
+- [ ] **Sacrosanct** — Regarded as too important or established to be questioned or changed *(Ideas & Claims)*
+- [ ] **Machiavellian** — Cunning and unscrupulous; willing to use any means to achieve an end *(Bias & Perspective)*
+- [ ] **Metacognitive** — Relating to awareness and understanding of one's own thought processes *(Critical Thinking)*
+- [ ] **Sesquipedalian** — Given to or characterized by the use of long, obscure words *(Language & Rhetoric)*
+
+---
+
+### June 16, 2026
+
+- [ ] **Casuistic** — Using clever but potentially flawed case-by-case moral reasoning *(Arguments & Reasoning)*
+- [ ] **Meretricious** — Apparently attractive but having no real value or integrity; falsely alluring *(Ideas & Claims)*
+- [ ] **Sectarian** — Narrowly loyal to a faction; treating in-group loyalty as the highest value *(Bias & Perspective)*
+- [ ] **Penumbral** — Existing in an indistinct, partially shadowed boundary zone between categories *(Nuance & Complexity)*
+- [ ] **Euphonious** — Pleasing to the ear; having an agreeably smooth and musical sound *(Language & Rhetoric)*
+
+---
+
+### June 17, 2026
+
+- [ ] **Eristic** — Relating to controversy or debate for its own sake rather than truth *(Arguments & Reasoning)*
+- [ ] **Pernicious** — Having a subtle but seriously harmful effect on thinking or belief *(Ideas & Claims)*
+- [ ] **Fatalistic** — Believing outcomes are predetermined; resigned to what appears inevitable *(Bias & Perspective)*
+- [ ] **Capricious** — Given to sudden and unaccountable changes; unpredictable in behavior or outcome *(Nuance & Complexity)*
+- [ ] **Sagacious** — Having keen mental discernment; shrewd and wise in judgment *(Critical Thinking)*
+
+---
+
+### June 18, 2026
+
+- [ ] **Elliptical** — With key steps omitted; cryptically indirect in expression *(Arguments & Reasoning)*
+- [ ] **Heretical** — Contrary to established doctrine or accepted belief *(Ideas & Claims)*
+- [ ] **Priggish** — Self-righteously correct; smugly adhering to narrow standards of propriety *(Bias & Perspective)*
+- [ ] **Mutable** — Subject to change; not fixed or stable in form or character *(Nuance & Complexity)*
+- [ ] **Synoptic** — Affording a comprehensive view of a whole; taking in the big picture *(Critical Thinking)*
+
+---
+
+### June 20, 2026
+
+- [ ] **Apophatic** — Describing something by stating what it is not, rather than what it is *(Arguments & Reasoning)*
+- [ ] **Complacent** — Uncritically satisfied with oneself; oblivious to risks or potential problems *(Bias & Perspective)*
+- [ ] **Polyphonic** — Containing many distinct and simultaneous voices or perspectives *(Nuance & Complexity)*
+- [ ] **Judicious** — Having sound judgment; sensible and careful in decisions *(Critical Thinking)*
+- [ ] **Florid** — Elaborately ornate; using excessively embellished or flowery language *(Language & Rhetoric)*
+
+---
+
+### June 21, 2026
+
+- [ ] **Paralogical** — Based on or exhibiting faulty or invalid logic *(Arguments & Reasoning)*
+- [ ] **Recondite** — Known only to specialists; obscure and not widely understood *(Ideas & Claims)*
+- [ ] **Idiosyncratic** — Peculiar to the individual; reflecting personal quirks over shared standards *(Bias & Perspective)*
+- [ ] **Kaleidoscopic** — Rapidly and unpredictably changing; made up of many shifting elements *(Nuance & Complexity)*
+- [ ] **Aphoristic** — Resembling or given to using concise, memorable sayings *(Language & Rhetoric)*
+
+---
+
+### June 22, 2026
+
+- [ ] **Tautological** — Needlessly circular; restating the same idea in different terms *(Arguments & Reasoning)*
+- [ ] **Incendiary** — Designed to inflame strong emotion or controversy *(Ideas & Claims)*
+- [ ] **Jingoistic** — Excessively and aggressively nationalistic in perspective *(Bias & Perspective)*
+- [ ] **Refractory** — Stubbornly resistant to resolution; persisting despite repeated attempts to fix it *(Nuance & Complexity)*
+- [ ] **Periphrastic** — Using indirect, roundabout expressions where simpler language would suffice *(Language & Rhetoric)*
+
+---
+
+### June 23, 2026
+
+- [ ] **Syllogistic** — Following the form of formal logical deduction from premises to conclusion *(Arguments & Reasoning)*
+- [ ] **Abstruse** — Difficult to comprehend; obscure and highly technical *(Ideas & Claims)*
+- [ ] **Variegated** — Exhibiting variety and diversity; marked by many different forms or characteristics *(Nuance & Complexity)*
+- [ ] **Dispassionate** — Not influenced by strong emotion; objective and impartial in judgment *(Critical Thinking)*
+- [ ] **Limpid** — Clear and simple; unmarred by unnecessary complexity or obscurity *(Language & Rhetoric)*
+
+---
+
+### June 24, 2026
+
+- [ ] **Sophistic** — Superficially clever but actually deceptive or misleading *(Arguments & Reasoning)*
+- [ ] **Derivative** — Lacking originality; imitative of prior work without adding new insight *(Ideas & Claims)*
+- [ ] **Xenophobic** — Harboring irrational fear or distrust of those outside one's group *(Bias & Perspective)*
+- [ ] **Aporetic** — Characterized by philosophical puzzlement without clear resolution *(Nuance & Complexity)*
+- [ ] **Scrupulous** — Careful and precise; attentive to doing things correctly and thoroughly *(Critical Thinking)*
+
+---
+
+### June 25, 2026
+
+- [ ] **Perspicuous** — Clearly expressed and immediately understandable; transparent in meaning *(Ideas & Claims)*
+- [ ] **Analytical** — Relating to or using the method of breaking complex things into component parts *(Critical Thinking)*
+- [ ] **Eclectic** — Deriving ideas from a broad and diverse range of sources *(Critical Thinking)*
+- [ ] **Bathetic** — Anticlimactically descending from the serious to the trivial; producing an effect of bathos *(Language & Rhetoric)*
+- [ ] **Allusive** — Containing many indirect references; suggesting without stating directly *(Language & Rhetoric)*
+
+---
+
+### June 26, 2026
+
+- [ ] **Skeptical** — Not easily convinced; inclined to question claims rather than accept them at face value *(Critical Thinking)*
+- [ ] **Lucid** — Clearly expressed; easy to follow through precise and careful organization *(Critical Thinking)*
+- [ ] **Apposite** — Highly pertinent and appropriate; directly relevant to the matter at hand *(Critical Thinking)*
+- [ ] **Sententious** — Given to moralizing; using pithy maxims to deliver a moral point *(Language & Rhetoric)*
+- [ ] **Cacophonous** — Harsh and discordant; jarring and unpleasant in sound or effect *(Language & Rhetoric)*
+
+---
+
+### June 27, 2026
+
+- [ ] **Rigorous** — Extremely thorough; not allowing for error, weakness, or imprecision *(Critical Thinking)*
+- [ ] **Meticulous** — Showing great attention to detail; precise and thorough in execution *(Critical Thinking)*
+- [ ] **Punctilious** — Showing great attention to correct behavior or detail; precise in following rules *(Critical Thinking)*
+- [ ] **Hortatory** — Giving strong encouragement; urging toward a particular course of action *(Language & Rhetoric)*
+- [ ] **Extemporaneous** — Spoken or composed without preparation; improvised on the spot *(Language & Rhetoric)*
+
+---
+
+### June 29, 2026
+
+*No new words added — the word bank is fully exhausted. All 206 words in the bank have been added to your deck. Time to expand the word bank!*
+
+---
+
+### June 30, 2026
+
+*No new words added — the word bank is still fully exhausted. All words have been added to your deck. Time to expand the word bank!*
+
+---
+
+### July 1, 2026
+
+*No new words added — the word bank is still fully exhausted (205 words in deck, all from the 187-word bank already used). Time to expand the word bank!*
